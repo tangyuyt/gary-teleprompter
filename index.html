@@ -291,8 +291,6 @@
       <input type="range" min="20" max="52" value="32" oninput="updateFont(this.value)">
     </div>
     <div class="setting-row">
-      <span class="setting-label">🎙 语音跟踪</span>
-      <div class="toggle-switch" id="voiceSw" onclick="toggleVoice()"></div>
     </div>
     <button class="settings-close" onclick="closeSettings()">关闭</button>
   </div>
@@ -455,7 +453,6 @@ function startVoiceOnly(){
   // Auto-start voice and hide play button
   document.getElementById('playBtn').style.display='none';
   ps.voiceOn=true;
-  document.getElementById('voiceSw').classList.add('on');
   startVoice();
 }
 
@@ -614,7 +611,6 @@ function finishEdit(){
 function openSettings(){
   document.getElementById('settingsOverlay').classList.add('show');
   document.getElementById('mirrorSw').classList.toggle('on',ps.mirror);
-  document.getElementById('voiceSw').classList.toggle('on',ps.voiceOn);
   document.querySelectorAll('.speed-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===ps.speed));
   // Sync margin slider
   document.getElementById('marginSlider').value = ps.margin;
@@ -652,12 +648,10 @@ function updateFont(v){
 let rec=null;
 function toggleVoice(){
   ps.voiceOn=!ps.voiceOn;
-  document.getElementById('voiceSw').classList.toggle('on');
   ps.voiceOn?startVoice():stopVoice();
 }
 function startVoice(){
   if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
-    toast('不支持语音'); ps.voiceOn=false; document.getElementById('voiceSw').classList.remove('on'); return;
   }
   rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
   rec.lang='zh-CN'; rec.continuous=true; rec.interimResults=true;
