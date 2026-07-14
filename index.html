@@ -251,7 +251,7 @@
   <div class="pres-scroll" id="presScroll">
     <div class="pres-text" id="presText"></div>
   </div>
-  <button class="pres-play-btn" id="playBtn" onclick="togglePlay()">▶ 播放</button>
+  <button class="pres-play-btn" id="playBtn">▶ 播放</button>
   <div class="pres-edit" id="presEdit">
     <textarea id="presEditText"></textarea>
     <button onclick="finishEdit()">完成编辑</button>
@@ -449,11 +449,15 @@ function startPresent(){
   showPage('presenterPage');
   renderLines();
   applyMargins();
-  // Center first line
-  setTimeout(() => {
-    let el = document.querySelector('#presText .line.hi');
-    if(el) el.scrollIntoView({behavior:'instant', block:'center'});
-  }, 100);
+  // Position first line at 35% from top for natural reading position
+  let presScroll = document.getElementById('presScroll');
+  let presText = document.getElementById('presText');
+  let firstLine = presText.querySelector('.line.hi');
+  if(firstLine){
+    let lineTop = firstLine.offsetTop;
+    let viewH = presScroll.clientHeight;
+    presScroll.scrollTop = lineTop - viewH * 0.35;
+  }
   updatePlayBtn(); updateProgress();
 }
 
@@ -468,9 +472,7 @@ function togglePlay(){
   if(ps.running){
     ps.lastT=performance.now(); ps.charAccum=0;
     ps.userScroll=false; scrollToActive();
-    if(!ps.raf || ps.raf._done){
-      ps.raf=requestAnimationFrame(scrollLoop);
-    }
+    ps.raf=requestAnimationFrame(scrollLoop);
   }
 }
 
@@ -481,7 +483,7 @@ function updatePlayBtn(){
 }
 
 function scrollLoop(now){
-  if(!ps.running){ps.raf=requestAnimationFrame(scrollLoop);ps.raf._done=true;return;}
+  if(!ps.running){return;}
   if(ps.userScroll){ps.raf=requestAnimationFrame(scrollLoop);return;}
   let dt=now-ps.lastT; ps.lastT=now;
   ps.charAccum += dt * ps.cpm;
@@ -548,6 +550,15 @@ function bindScroll(){
 // LONG PRESS EDIT
 let lpT=null;
 document.addEventListener('DOMContentLoaded',()=>{
+  // Play button with pointerdown for instant response
+  document.getElementById('playBtn').addEventListener('pointerdown',(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    togglePlay();
+  });
+  // Also support regular click
+  document.getElementById('playBtn').addEventListener('click',(e)=>{
+    e.preventDefault(); e.stopPropagation();
+  });
   let s=document.getElementById('presScroll');
   s.addEventListener('touchstart',(e)=>{
     if(e.target.classList.contains('line'))return;
