@@ -343,8 +343,12 @@ function renderLines() {
   splitLines();
   let html = '';
   for (let i=0; i<ps.lines.length; i++) {
-    let cls = i===ps.curLine?' hi':'';
-    if(!ps.voiceMode && i!==ps.curLine) cls += ' dim';
+    let cls = '';
+    if(ps.voiceMode){
+      cls = ''; // Voice mode: no highlight, all same
+    } else {
+      cls = i===ps.curLine?' hi':' dim';
+    }
     html += `<span class="line${cls}" data-l="${i}" onclick="jumpLine(${i},event)">${esc(ps.lines[i]||'&nbsp;')}</span>`;
   }
   document.getElementById('presText').innerHTML = html;
