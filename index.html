@@ -304,7 +304,7 @@ let ps = {
   running: false, speed: 240, mirror: false,
   margin: 16, fontSize: 32, voiceOn: false,
   fullText: '', lines: [], curLine: 0,
-  raf: null, lastT: 0, cpm: 240/60000,
+  raf: null, lastT: 0, cpm: 240/60000, charAccum: 0,
   userScroll: false, scrollTO: null
 };
 
@@ -461,7 +461,7 @@ function jumpLine(i,e){
 
 function togglePlay(){
   ps.running=!ps.running;
-  if(ps.running){ ps.lastT=performance.now(); ps.userScroll=false; scrollToActive(); requestAnimationFrame(scrollLoop); }
+  if(ps.running){ ps.lastT=performance.now(); ps.charAccum=0; ps.userScroll=false; scrollToActive(); requestAnimationFrame(scrollLoop); }
   updatePlayBtn();
 }
 
@@ -475,11 +475,11 @@ function scrollLoop(now){
   if(!ps.running){ps.raf=requestAnimationFrame(scrollLoop);return;}
   if(ps.userScroll){ps.raf=requestAnimationFrame(scrollLoop);return;}
   let dt=now-ps.lastT; ps.lastT=now;
-  let adv=dt*ps.cpm;
-  while(adv>0 && ps.curLine<ps.lines.length){
+  ps.charAccum += dt * ps.cpm;
+  while(ps.charAccum>0 && ps.curLine<ps.lines.length){
     let len=(ps.lines[ps.curLine]||'').length;
-    if(adv<len){adv=0;}
-    else{adv-=len; ps.curLine++;}
+    if(ps.charAccum<len){ps.charAccum=0;}
+    else{ps.charAccum-=len; ps.curLine++;}
   }
   if(ps.curLine>=ps.lines.length)ps.curLine=0;
   renderLines(); updateProgress(); scrollToActive();
