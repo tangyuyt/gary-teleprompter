@@ -124,10 +124,13 @@
     }
     .pres-text.mirror { transform: scaleX(-1); }
     .pres-text .line {
-      display: block; opacity: 0.5; padding: 1px 0;
+      display: block; opacity: 1; padding: 1px 0;
     }
     .pres-text .line.hi {
-      opacity: 1; font-weight: 700;
+      font-weight: 700;
+    }
+    .pres-text .line.dim {
+      opacity: 0.5;
     }
     .pres-play-btn {
       position: fixed; bottom: 30px; right: 20px;
@@ -340,7 +343,9 @@ function renderLines() {
   splitLines();
   let html = '';
   for (let i=0; i<ps.lines.length; i++) {
-    html += `<span class="line${i===ps.curLine?' hi':''}" data-l="${i}" onclick="jumpLine(${i},event)">${esc(ps.lines[i]||'&nbsp;')}</span>`;
+    let cls = i===ps.curLine?' hi':'';
+    if(!ps.voiceMode && i!==ps.curLine) cls += ' dim';
+    html += `<span class="line${cls}" data-l="${i}" onclick="jumpLine(${i},event)">${esc(ps.lines[i]||'&nbsp;')}</span>`;
   }
   document.getElementById('presText').innerHTML = html;
   document.getElementById('presText').style.fontSize = ps.fontSize+'px';
@@ -675,8 +680,10 @@ function startVoice(){
       for(let i=0;i<ps.lines.length;i++){
         charCount += (ps.lines[i]||'').length;
         if(charCount >= bestIdx){
-          if(i > ps.curLine){
-            ps.curLine = i;
+          // Advance one line ahead so user always sees next line
+          let target = Math.min(i + 1, ps.lines.length - 1);
+          if(target > ps.curLine || i > ps.curLine){
+            ps.curLine = target;
             renderLines(); updateProgress(); scrollToActive();
           }
           break;
