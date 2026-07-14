@@ -329,12 +329,7 @@ function splitLines() {
       result.push(text.slice(i));
       break;
     }
-    // Try to break at a natural boundary (punctuation or space)
-    let slice = text.slice(i, Math.min(end + 10, text.length));
-    let brk = slice.search(/[。！？；，、\n\r\s]/);
-    if (brk >= 0 && brk < charsPerLine) {
-      end = i + brk + 1;
-    }
+    // Pure character count, no punctuation breaking
     result.push(text.slice(i, end));
     i = end;
   }
@@ -454,7 +449,11 @@ function startPresent(){
   showPage('presenterPage');
   renderLines();
   applyMargins();
-  document.getElementById('presScroll').scrollTop=0;
+  // Center first line
+  setTimeout(() => {
+    let el = document.querySelector('#presText .line.hi');
+    if(el) el.scrollIntoView({behavior:'instant', block:'center'});
+  }, 100);
   updatePlayBtn(); updateProgress();
 }
 
@@ -465,15 +464,14 @@ function jumpLine(i,e){
 
 function togglePlay(){
   ps.running=!ps.running;
+  updatePlayBtn();
   if(ps.running){
     ps.lastT=performance.now(); ps.charAccum=0;
     ps.userScroll=false; scrollToActive();
-    if(ps.raf)cancelAnimationFrame(ps.raf);
-    ps.raf=requestAnimationFrame(scrollLoop);
-  } else {
-    if(ps.raf)cancelAnimationFrame(ps.raf);
+    if(!ps.raf || ps.raf._done){
+      ps.raf=requestAnimationFrame(scrollLoop);
+    }
   }
-  updatePlayBtn();
 }
 
 function updatePlayBtn(){
@@ -483,7 +481,7 @@ function updatePlayBtn(){
 }
 
 function scrollLoop(now){
-  if(!ps.running){ps.raf=requestAnimationFrame(scrollLoop);return;}
+  if(!ps.running){ps.raf=requestAnimationFrame(scrollLoop);ps.raf._done=true;return;}
   if(ps.userScroll){ps.raf=requestAnimationFrame(scrollLoop);return;}
   let dt=now-ps.lastT; ps.lastT=now;
   ps.charAccum += dt * ps.cpm;
@@ -631,14 +629,23 @@ function startVoice(){
   rec.lang='zh-CN'; rec.continuous=true; rec.interimResults=true;
   rec.onresult=e=>{
     let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
-    let full=ps.lines.join('');
-    let idx=full.indexOf(t.slice(-8));
-    if(idx>=0){
-      let c=0;
-      for(let i=0;i<ps.lines.length;i++){
-        c+=(ps.lines[i]||'').length;
-        if(c>idx){ps.curLine=i;renderLines();updateProgress();scrollToActive();break;}
+    // Check if last 3 chars of ANY upcoming line match the end of spoken text
+    let tail = t.slice(-3);
+    for(let li=ps.curLine; li<Math.min(ps.curLine+5, ps.lines.length); li++){
+      let line = (ps.lines[li]||'').slice(-3);
+      if(line && t.indexOf(line)>=0){
+        if(li > ps.curLine){
+          ps.curLine = li;
+          renderLines(); updateProgress(); scrollToActive();
+        }
+        break;
       }
+    }
+    // Auto-start playback if not already running
+    if(!ps.running){
+      ps.running=true; ps.lastT=performance.now(); ps.charAccum=0;
+      updatePlayBtn();
+      if(!ps.raf || ps.raf._done) ps.raf=requestAnimationFrame(scrollLoop);
     }
   };
   rec.start();
