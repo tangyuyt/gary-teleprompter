@@ -22,78 +22,59 @@
     .page { display: none; min-height: 100vh; }
     .page.active { display: block; }
 
-    /* ── Home Page ── */
+    /* ── Home ── */
     .home-header {
-      background: #6F4E37;
-      color: #fff;
+      background: #6F4E37; color: #fff;
       padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 10;
     }
     .home-title { font-size: 18px; font-weight: 700; letter-spacing: 2px; }
-    .home-actions { display: flex; gap: 12px; align-items: center; }
-    .icon-btn {
+    .home-header button {
       background: none; border: none; color: #fff;
-      font-size: 20px; cursor: pointer; padding: 4px;
+      font-size: 14px; cursor: pointer; padding: 4px 8px;
     }
-    .select-btn { font-size: 14px; }
     .script-list { padding: 12px; }
     .script-item {
-      background: #fff;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: transform 0.1s;
+      background: #fff; border-radius: 12px; padding: 14px;
+      margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: transform 0.1s;
     }
     .script-item:active { transform: scale(0.98); }
-    .script-item .checkbox {
+    .script-item .cb {
       width: 22px; height: 22px; border: 2px solid #ccc;
-      border-radius: 6px; flex-shrink: 0; display: none;
-      align-items: center; justify-content: center;
+      border-radius: 6px; flex-shrink: 0;
+      display: none; align-items: center; justify-content: center;
     }
-    .script-item .checkbox.checked { background: #6F4E37; border-color: #6F4E37; }
-    .script-item .checkbox.checked::after { content: '✓'; color: #fff; font-size: 14px; }
-    .script-item.selecting .checkbox { display: flex; }
+    .script-item.inSelect .cb { display: flex; }
+    .script-item .cb.sel { background: #6F4E37; border-color: #6F4E37; }
+    .script-item .cb.sel::after { content: '✓'; color: #fff; font-size: 14px; }
     .script-info { flex: 1; min-width: 0; }
-    .script-info .title { font-size: 15px; font-weight: 600; color: #3E2723; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .script-info .meta { font-size: 11px; color: #A1887F; margin-top: 4px; }
+    .script-info .t { font-size: 15px; font-weight: 600; color: #3E2723; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .script-info .m { font-size: 11px; color: #A1887F; margin-top: 4px; }
     .empty-state { text-align: center; padding: 60px 20px; color: #BCAAA4; }
-    .empty-state .icon { font-size: 56px; }
+    .empty-state .ic { font-size: 56px; }
     .empty-state p { margin-top: 10px; font-size: 14px; }
     .fab {
       position: fixed; bottom: 24px; right: 24px;
       width: 56px; height: 56px; border-radius: 28px;
       background: #6F4E37; color: #fff; border: none;
       font-size: 28px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(111,78,55,0.3);
-      z-index: 20;
+      box-shadow: 0 4px 16px rgba(111,78,55,0.3); z-index: 20;
     }
     .delete-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: #D32F2F; color: #fff;
-      padding: 14px 20px;
-      text-align: center;
+      padding: 14px; text-align: center;
       font-size: 16px; font-weight: 600;
-      display: none; z-index: 30;
-      cursor: pointer;
+      display: none; z-index: 30; cursor: pointer;
     }
 
-    /* ── Editor Page ── */
+    /* ── Editor ── */
     .editor-header {
       background: #6F4E37; color: #fff;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
       position: sticky; top: 0; z-index: 10;
     }
     .editor-header .back { font-size: 18px; cursor: pointer; }
@@ -117,8 +98,7 @@
     }
     .tool-btn {
       flex: 1; padding: 12px; border-radius: 12px;
-      border: none; font-size: 13px; font-weight: 600;
-      cursor: pointer; letter-spacing: 1px;
+      border: none; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-paste { background: #E8E0D9; color: #6F4E37; }
     .btn-save { background: #E8E0D9; color: #6F4E37; }
@@ -126,47 +106,48 @@
       background: #6F4E37; color: #fff;
       margin: 0 12px 20px; width: calc(100% - 24px);
       padding: 16px; border-radius: 14px; border: none;
-      font-size: 17px; font-weight: 700; cursor: pointer;
-      letter-spacing: 2px;
+      font-size: 17px; font-weight: 700; cursor: pointer; letter-spacing: 2px;
     }
     .btn-start:active { background: #5D3D2A; }
 
-    /* ── Presenter Page ── */
-    .presenter-page { background: #000; }
-    .presenter-header {
+    /* ── Presenter ── */
+    .pres-page { background: #000; }
+    .pres-header {
       position: fixed; top: 0; left: 0; right: 0;
       display: flex; justify-content: space-between;
       padding: 12px 16px; z-index: 20;
     }
-    .presenter-header .icon-btn { color: #666; }
-    .presenter-scroll {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      overflow-y: auto;
-      z-index: 5;
+    .pres-header button {
+      background: none; border: none; color: #666;
+      font-size: 20px; cursor: pointer;
+    }
+    .pres-scroll {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      overflow-y: auto; z-index: 5;
       -webkit-overflow-scrolling: touch;
     }
-    .presenter-text {
-      color: #fff;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      word-break: break-all;
+    .pres-text {
+      color: #fff; line-height: 1.8;
+      white-space: pre-wrap; word-break: break-all;
       min-height: 100vh;
-      padding-top: 70px;
-      padding-bottom: 60vh;
+      padding-top: 70px; padding-bottom: 60vh;
     }
-    .presenter-text.mirror { transform: scaleX(-1); }
-    .presenter-text .line {
-      display: block;
-      opacity: 0.5;
-      padding: 2px 0;
-      transition: opacity 0.3s;
+    .pres-text.mirror { transform: scaleX(-1); }
+    .pres-text .line {
+      display: block; opacity: 0.5; padding: 2px 0;
     }
-    .presenter-text .line.active {
-      opacity: 1;
-      font-weight: 700;
+    .pres-text .line.hi {
+      opacity: 1; font-weight: 700;
     }
-    .presenter-text .line.past { opacity: 0.2; }
+    .pres-play-btn {
+      position: fixed; bottom: 30px; right: 20px;
+      width: 64px; height: 64px; border-radius: 32px;
+      background: #6F4E37; color: #fff; border: none;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      z-index: 25; letter-spacing: 1px;
+      box-shadow: 0 4px 20px rgba(111,78,55,0.5);
+    }
+    .pres-play-btn.paused { background: #555; }
     .progress-bar {
       position: fixed; right: 0; top: 0; bottom: 0;
       width: 3px; background: rgba(255,255,255,0.1);
@@ -177,23 +158,23 @@
       background: rgba(255,255,255,0.4);
       transition: height 0.1s linear;
     }
-    .presenter-edit {
+    .pres-edit {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: rgba(0,0,0,0.9); z-index: 30;
       padding: 12px; display: none;
     }
-    .presenter-edit textarea {
+    .pres-edit textarea {
       width: 100%; height: 120px; background: #222; color: #fff;
       border: 1px solid #444; border-radius: 8px; padding: 10px;
       font-size: 14px; resize: none; font-family: inherit;
     }
-    .presenter-edit .done-btn {
+    .pres-edit button {
       width: 100%; margin-top: 8px; padding: 10px;
       background: #6F4E37; color: #fff; border: none;
       border-radius: 8px; font-size: 14px; cursor: pointer;
     }
 
-    /* ── Settings Panel ── */
+    /* ── Settings ── */
     .settings-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
       z-index: 25; display: none; align-items: flex-end;
@@ -239,26 +220,25 @@
       position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
       background: rgba(0,0,0,0.8); color: #fff; padding: 10px 24px;
       border-radius: 20px; font-size: 13px; z-index: 100;
-      opacity: 0; transition: opacity 0.3s;
-      pointer-events: none;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
     }
     .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
 
+<!-- HOME -->
 <div class="page active" id="homePage">
   <div class="home-header">
     <span class="home-title">📽 Gary提词器</span>
-    <div class="home-actions" id="homeActions">
-      <button class="icon-btn select-btn" id="selectToggle" onclick="toggleSelectMode()">选择</button>
-    </div>
+    <button id="headerBtn" onclick="toggleSelect()">选择</button>
   </div>
   <div class="script-list" id="scriptList"></div>
   <button class="fab" onclick="newScript()">＋</button>
-  <div class="delete-bar" id="deleteBar" onclick="deleteSelected()">🗑 删除所选</div>
+  <div class="delete-bar" id="deleteBar" onclick="doDelete()">🗑 删除所选</div>
 </div>
 
+<!-- EDITOR -->
 <div class="page" id="editorPage">
   <div class="editor-header">
     <span class="back" onclick="goHome()">←</span>
@@ -268,62 +248,59 @@
     <textarea id="scriptContent" placeholder="在此输入或粘贴演讲内容..."></textarea>
   </div>
   <div class="editor-tools">
-    <button class="tool-btn btn-paste" onclick="pasteFromClipboard()">📋 粘贴</button>
+    <button class="tool-btn btn-paste" onclick="pasteClip()">📋 粘贴</button>
     <button class="tool-btn btn-save" onclick="saveCurrent()">💾 保存</button>
   </div>
   <button class="btn-start" onclick="startPresent()">🎤 开始提词</button>
 </div>
 
-<div class="page presenter-page" id="presenterPage">
-  <div class="presenter-header">
-    <button class="icon-btn" onclick="stopPresent()">←</button>
-    <button class="icon-btn" onclick="openSettings()">⚙</button>
+<!-- PRESENTER -->
+<div class="page pres-page" id="presenterPage">
+  <div class="pres-header">
+    <button onclick="stopPresent()">←</button>
+    <button onclick="openSettings()">⚙</button>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="presenter-scroll" id="presenterScroll">
-    <div class="presenter-text" id="presenterText"></div>
+  <div class="pres-scroll" id="presScroll">
+    <div class="pres-text" id="presText"></div>
   </div>
-  <div class="presenter-edit" id="presenterEdit">
-    <textarea id="presenterEditText"></textarea>
-    <button class="done-btn" onclick="finishInlineEdit()">完成编辑</button>
+  <button class="pres-play-btn" id="playBtn" onclick="togglePlay()">▶ 播放</button>
+  <div class="pres-edit" id="presEdit">
+    <textarea id="presEditText"></textarea>
+    <button onclick="finishEdit()">完成编辑</button>
   </div>
 </div>
 
+<!-- SETTINGS -->
 <div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()">
   <div class="settings-panel" onclick="event.stopPropagation()">
     <h3>⚙ 设置</h3>
-
     <div class="setting-row">
       <span class="setting-label">播放速度（字/分）</span>
-      <div class="speed-btns">
-        <button class="speed-btn" data-speed="120" onclick="setSpeed(120,this)">120</button>
-        <button class="speed-btn" data-speed="180" onclick="setSpeed(180,this)">180</button>
-        <button class="speed-btn active" data-speed="240" onclick="setSpeed(240,this)">240</button>
-        <button class="speed-btn" data-speed="300" onclick="setSpeed(300,this)">300</button>
-        <button class="speed-btn" data-speed="360" onclick="setSpeed(360,this)">360</button>
+      <div class="speed-btns" id="speedBtns">
+        <button class="speed-btn" data-s="120" onclick="setSpeed(120,this)">120</button>
+        <button class="speed-btn" data-s="180" onclick="setSpeed(180,this)">180</button>
+        <button class="speed-btn active" data-s="240" onclick="setSpeed(240,this)">240</button>
+        <button class="speed-btn" data-s="300" onclick="setSpeed(300,this)">300</button>
+        <button class="speed-btn" data-s="360" onclick="setSpeed(360,this)">360</button>
       </div>
     </div>
-
     <div class="setting-row">
       <span class="setting-label">🪞 镜像</span>
-      <div class="toggle-switch" id="mirrorToggle" onclick="toggleMirror()"></div>
+      <div class="toggle-switch" id="mirrorSw" onclick="toggleMirror()"></div>
     </div>
-
     <div class="setting-row">
       <span class="setting-label">📐 页边距</span>
-      <input type="range" min="8" max="48" value="16" oninput="updateMargin(this.value)">
+      <input type="range" min="4" max="80" value="16" oninput="updateMargin(this.value)">
     </div>
-
     <div class="setting-row">
       <span class="setting-label">🔤 字体大小</span>
-      <input type="range" min="20" max="52" value="32" oninput="updateFontSize(this.value)">
+      <input type="range" min="20" max="52" value="32" oninput="updateFont(this.value)">
     </div>
-
     <div class="setting-row">
       <span class="setting-label">🎙 语音跟踪</span>
-      <div class="toggle-switch" id="voiceToggle" onclick="toggleVoice()"></div>
+      <div class="toggle-switch" id="voiceSw" onclick="toggleVoice()"></div>
     </div>
-
     <button class="settings-close" onclick="closeSettings()">关闭</button>
   </div>
 </div>
@@ -331,435 +308,324 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── App State ──
-let scripts = JSON.parse(localStorage.getItem('gary_scripts') || '[]');
-let currentId = null;
-let selectMode = false;
-let selectedIds = new Set();
+// ── STATE ──
+let scripts = JSON.parse(localStorage.getItem('gary_scripts')||'[]');
+let curId = null;
+let selMode = false;
+let selSet = new Set();
 
-let presenterState = {
-  running: false,
-  speed: 240,
-  mirror: false,
-  margin: 16,
-  fontSize: 32,
-  voiceOn: false,
-  lines: [],
-  currentLine: 0,
-  charOffset: 0,
-  rafId: null,
-  lastTime: 0,
-  charsPerMs: 240 / 60000,
-  userScrolling: false,
-  scrollTimeout: null,
+let ps = {
+  running: false, speed: 240, mirror: false,
+  margin: 16, fontSize: 32, voiceOn: false,
+  lines: [], curLine: 0,
+  raf: null, lastT: 0, cpm: 240/60000,
+  userScroll: false, scrollTO: null
 };
 
-// ── Home ──
+// ── HOME ──
 function renderHome() {
-  const el = document.getElementById('scriptList');
+  let list = document.getElementById('scriptList');
+  let btn = document.getElementById('headerBtn');
+  let bar = document.getElementById('deleteBar');
+  let fab = document.querySelector('.fab');
+
   if (scripts.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><p>还没有提词稿<br>点击 ＋ 新建</p></div>';
-    document.getElementById('selectToggle').style.display = 'none';
+    list.innerHTML = '<div class="empty-state"><div class="ic">📂</div><p>还没有提词稿<br>点击 ＋ 新建</p></div>';
+    btn.style.display = 'none';
+    selMode = false; selSet.clear();
   } else {
-    document.getElementById('selectToggle').style.display = '';
+    btn.style.display = '';
+    list.innerHTML = scripts.map((s,i) => {
+      let sel = selSet.has(i);
+      return `<div class="script-item${selMode?' inSelect':''}" onclick="${selMode?`toggleSel(${i},event)`:`openScript(${i})`}">
+        <div class="cb${sel?' sel':''}"></div>
+        <div class="script-info"><div class="t">${esc(s.title||'未命名')}</div><div class="m">${s.date} · ${cc(s.content)}字</div></div>
+      </div>`;
+    }).join('');
   }
-  if (selectMode && scripts.length === 0) {
-    selectMode = false;
-    selectedIds.clear();
-  }
-  el.innerHTML = scripts.map((s, i) => `
-    <div class="script-item ${selectMode ? 'selecting' : ''}" onclick="${selectMode ? `toggleCheck(${i},event)` : `openScript(${i})`}">
-      <div class="checkbox ${selectedIds.has(i) ? 'checked' : ''}"></div>
-      <div class="script-info">
-        <div class="title">${esc(s.title || '未命名')}</div>
-        <div class="meta">${s.date} · ${charCount(s.content)}字</div>
-      </div>
-    </div>
-  `).join('');
-  
-  const actions = document.getElementById('homeActions');
-  if (selectMode) {
-    actions.innerHTML = '<button class="icon-btn select-btn" onclick="toggleSelectMode()">取消</button>';
-  } else {
-    actions.innerHTML = '<button class="icon-btn select-btn" id="selectToggle" onclick="toggleSelectMode()">选择</button>';
-    if (scripts.length === 0) document.getElementById('selectToggle').style.display = 'none';
-  }
-  
-  document.getElementById('deleteBar').style.display = selectMode ? 'block' : 'none';
+  btn.textContent = selMode ? '取消' : '选择';
+  bar.style.display = selMode ? 'block' : 'none';
+  if (selMode) fab.style.display = 'none'; else fab.style.display = '';
 }
 
-function charCount(t) { return t.replace(/\s/g, '').length; }
-function esc(s) { return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cc(t){ return t.replace(/\s/g,'').length; }
+function esc(s){ return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function toggleSelect() {
+  selMode = !selMode;
+  selSet.clear();
+  renderHome();
+}
+
+function toggleSel(i, e) {
+  e.stopPropagation();
+  if (selSet.has(i)) selSet.delete(i); else selSet.add(i);
+  renderHome();
+}
+
+function doDelete() {
+  if (selSet.size === 0) return;
+  if (!confirm(`确定删除 ${selSet.size} 个？`)) return;
+  let sorted = [...selSet].sort((a,b)=>b-a);
+  for (let i of sorted) scripts.splice(i,1);
+  selSet.clear();
+  selMode = false;
+  saveScripts();
+  renderHome();
+}
 
 function newScript() {
-  if (selectMode) return;
-  currentId = Date.now().toString();
+  if (selMode) return;
+  curId = Date.now().toString();
   document.getElementById('scriptTitle').value = '';
   document.getElementById('scriptContent').value = '';
   showPage('editorPage');
 }
 
-function openScript(idx) {
-  if (selectMode) return;
-  const s = scripts[idx];
-  currentId = s.id;
+function openScript(i) {
+  let s = scripts[i]; curId = s.id;
   document.getElementById('scriptTitle').value = s.title;
   document.getElementById('scriptContent').value = s.content;
   showPage('editorPage');
 }
 
-function toggleSelectMode() {
-  selectMode = !selectMode;
-  selectedIds.clear();
-  renderHome();
-}
-
-function toggleCheck(idx, e) {
-  e.stopPropagation();
-  if (selectedIds.has(idx)) selectedIds.delete(idx);
-  else selectedIds.add(idx);
-  renderHome();
-}
-
-function deleteSelected() {
-  if (selectedIds.size === 0) return;
-  if (!confirm(`确定删除 ${selectedIds.size} 个提词稿？`)) return;
-  const sorted = [...selectedIds].sort((a,b) => b-a);
-  for (const i of sorted) scripts.splice(i, 1);
-  selectedIds.clear();
-  selectMode = false;
-  saveScripts();
-  renderHome();
-}
-
-// ── Editor ──
+// ── EDITOR ──
 function saveCurrent() {
-  const title = document.getElementById('scriptTitle').value.trim() || '未命名';
-  const content = document.getElementById('scriptContent').value;
-  const idx = scripts.findIndex(s => s.id === currentId);
-  const obj = { id: currentId, title, content, date: today() };
-  if (idx >= 0) scripts[idx] = obj;
-  else scripts.unshift(obj);
-  saveScripts();
-  toast('已保存 ✅');
+  let title = document.getElementById('scriptTitle').value.trim()||'未命名';
+  let content = document.getElementById('scriptContent').value;
+  let idx = scripts.findIndex(s=>s.id===curId);
+  let obj = {id:curId,title,content,date:today()};
+  if (idx>=0) scripts[idx]=obj; else scripts.unshift(obj);
+  saveScripts(); toast('已保存 ✅');
 }
 
-async function pasteFromClipboard() {
+async function pasteClip() {
   try {
-    const text = await navigator.clipboard.readText();
-    if (text) {
-      document.getElementById('scriptContent').value = text;
-      toast('已粘贴 📋');
-    }
-  } catch(e) {
-    toast('请手动粘贴');
-  }
+    let t = await navigator.clipboard.readText();
+    if (t) { document.getElementById('scriptContent').value = t; toast('已粘贴 📋'); }
+  } catch(e) { toast('请手动粘贴'); }
 }
 
 function goHome() {
   saveCurrent();
-  showPage('homePage');
-  renderHome();
+  showPage('homePage'); renderHome();
 }
 
-// ── Presenter ──
+// ── PRESENTER ──
 function startPresent() {
-  const content = document.getElementById('scriptContent').value;
+  let content = document.getElementById('scriptContent').value;
   if (!content.trim()) { toast('请先输入内容'); return; }
   saveCurrent();
-  presenterState.lines = content.split('\n');
-  presenterState.currentLine = 0;
-  presenterState.charOffset = 0;
-  presenterState.charsPerMs = presenterState.speed / 60000;
-  presenterState.running = true;
-  presenterState.lastTime = performance.now();
-  presenterState.userScrolling = false;
-  showPage('presenterPage');
-  renderAllLines();
-  applyPresenterMargins();
-  scrollToActiveLine();
-  document.getElementById('presenterScroll').scrollTop = 0;
-  requestAnimationFrame(scrollLoop);
-}
-
-function renderAllLines() {
-  const lines = presenterState.lines;
-  let html = '';
-  for (let i = 0; i < lines.length; i++) {
-    let cls = '';
-    if (i < presenterState.currentLine) cls = 'past';
-    else if (i === presenterState.currentLine) cls = 'active';
-    html += `<span class="line ${cls}" data-line="${i}" onclick="jumpToLine(${i}, event)">${lines[i] || '&nbsp;'}</span>`;
-  }
-  document.getElementById('presenterText').innerHTML = html;
-  document.getElementById('presenterText').style.fontSize = presenterState.fontSize + 'px';
-}
-
-let scrollRAF = null;
-function scrollToActiveLine() {
-  if (scrollRAF) return;
-  scrollRAF = requestAnimationFrame(() => {
-    scrollRAF = null;
-    if (presenterState.userScrolling) return;
-    const activeEl = document.querySelector('.presenter-text .line.active');
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  });
-}
-
-function jumpToLine(idx, e) {
-  e.stopPropagation();
-  presenterState.currentLine = idx;
-  presenterState.charOffset = 0;
-  presenterState.lastTime = performance.now();
-  // Count chars in previous lines
-  let chars = 0;
-  for (let i = 0; i < idx; i++) chars += (presenterState.lines[i] || '').length;
-  presenterState.charOffset = chars;
-  renderAllLines();
+  ps.lines = content.split('\n');
+  ps.curLine = 0; ps.cpm = ps.speed/60000;
+  ps.running = false; ps.userScroll = false;
+  showPage('presPage');
+  renderLines();
+  applyMargins();
+  document.getElementById('presScroll').scrollTop = 0;
+  updatePlayBtn();
   updateProgress();
+}
+
+function renderLines() {
+  let html = '';
+  for (let i=0; i<ps.lines.length; i++) {
+    html += `<span class="line${i===ps.curLine?' hi':''}" data-l="${i}" onclick="jumpLine(${i},event)">${ps.lines[i]||'&nbsp;'}</span>`;
+  }
+  document.getElementById('presText').innerHTML = html;
+  document.getElementById('presText').style.fontSize = ps.fontSize+'px';
+}
+
+function jumpLine(i, e) {
+  e.stopPropagation();
+  ps.curLine = i;
+  renderLines();
+  updateProgress();
+  scrollToActive();
+}
+
+function togglePlay() {
+  ps.running = !ps.running;
+  if (ps.running) {
+    ps.lastT = performance.now();
+    ps.userScroll = false;
+    scrollToActive();
+    requestAnimationFrame(scrollLoop);
+  }
+  updatePlayBtn();
+}
+
+function updatePlayBtn() {
+  let btn = document.getElementById('playBtn');
+  if (ps.running) { btn.textContent = '⏸ 暂停'; btn.classList.add('paused'); }
+  else { btn.textContent = '▶ 播放'; btn.classList.remove('paused'); }
 }
 
 function scrollLoop(now) {
-  if (!presenterState.running) { presenterState.rafId = requestAnimationFrame(scrollLoop); return; }
-  if (presenterState.userScrolling) { presenterState.rafId = requestAnimationFrame(scrollLoop); return; }
-  
-  const dt = now - presenterState.lastTime;
-  presenterState.lastTime = now;
-  const charsToAdvance = dt * presenterState.charsPerMs;
-  
-  // Advance through lines
-  let remaining = charsToAdvance;
-  while (remaining > 0 && presenterState.currentLine < presenterState.lines.length) {
-    const lineLen = (presenterState.lines[presenterState.currentLine] || '').length;
-    const leftInLine = lineLen - presenterState.charOffset;
-    if (remaining < leftInLine) {
-      presenterState.charOffset += remaining;
-      remaining = 0;
-    } else {
-      remaining -= leftInLine;
-      presenterState.currentLine++;
-      presenterState.charOffset = 0;
-      if (presenterState.currentLine >= presenterState.lines.length) {
-        presenterState.currentLine = 0;
-        presenterState.charOffset = 0;
-      }
-      renderAllLines();
-      scrollToActiveLine();
-    }
+  if (!ps.running) { ps.raf = requestAnimationFrame(scrollLoop); return; }
+  if (ps.userScroll) { ps.raf = requestAnimationFrame(scrollLoop); return; }
+  let dt = now - ps.lastT; ps.lastT = now;
+  let adv = dt * ps.cpm;
+  while (adv > 0 && ps.curLine < ps.lines.length) {
+    let len = (ps.lines[ps.curLine]||'').length;
+    if (adv < len) { adv = 0; }
+    else { adv -= len; ps.curLine++; }
   }
+  if (ps.curLine >= ps.lines.length) ps.curLine = 0;
+  renderLines();
   updateProgress();
-  presenterState.rafId = requestAnimationFrame(scrollLoop);
+  scrollToActive();
+  ps.raf = requestAnimationFrame(scrollLoop);
 }
 
 function updateProgress() {
-  let totalChars = 0;
-  for (const l of presenterState.lines) totalChars += (l || '').length;
-  let doneChars = 0;
-  for (let i = 0; i < presenterState.currentLine; i++) doneChars += (presenterState.lines[i] || '').length;
-  doneChars += presenterState.charOffset;
-  const pct = totalChars > 0 ? Math.min(100, (doneChars / totalChars) * 100) : 0;
-  document.getElementById('progressFill').style.height = pct + '%';
+  let total = 0; for (let l of ps.lines) total += (l||'').length;
+  let done = 0; for (let i=0; i<ps.curLine; i++) done += (ps.lines[i]||'').length;
+  let pct = total>0 ? Math.min(100,(done/total)*100) : 0;
+  document.getElementById('progressFill').style.height = pct+'%';
 }
 
-function applyPresenterMargins() {
-  const m = presenterState.margin;
-  document.getElementById('presenterText').style.paddingLeft = m + 'px';
-  document.getElementById('presenterText').style.paddingRight = m + 'px';
-}
-
-function stopPresent() {
-  presenterState.running = false;
-  if (presenterState.rafId) cancelAnimationFrame(presenterState.rafId);
-  if (presenterState.voiceOn) stopVoice();
-  document.getElementById('presenterEdit').style.display = 'none';
-  showPage('editorPage');
-}
-
-// ── User scroll detection ──
-const scrollEl = () => document.getElementById('presenterScroll');
-scrollEl._ref = null;
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Use a mutation observer or just bind after the element exists
-});
-
-// We'll bind scroll events after presenter page shows
-function bindScrollEvents() {
-  const el = document.getElementById('presenterScroll');
-  el.onscroll = () => {
-    presenterState.userScrolling = true;
-    clearTimeout(presenterState.scrollTimeout);
-    presenterState.scrollTimeout = setTimeout(() => {
-      presenterState.userScrolling = false;
-      scrollToActiveLine();
-    }, 2000);
-  };
-}
-
-// ── Settings ──
-function openSettings() {
-  document.getElementById('settingsOverlay').classList.add('show');
-  if (presenterState.mirror) document.getElementById('mirrorToggle').classList.add('on');
-  else document.getElementById('mirrorToggle').classList.remove('on');
-  if (presenterState.voiceOn) document.getElementById('voiceToggle').classList.add('on');
-  else document.getElementById('voiceToggle').classList.remove('on');
-  document.querySelectorAll('.speed-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.dataset.speed) === presenterState.speed);
+let srAF = null;
+function scrollToActive() {
+  if (srAF) return;
+  srAF = requestAnimationFrame(() => {
+    srAF = null;
+    if (ps.userScroll) return;
+    let el = document.querySelector('#presText .line.hi');
+    if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
   });
 }
 
-function closeSettings() {
-  document.getElementById('settingsOverlay').classList.remove('show');
+function applyMargins() {
+  document.getElementById('presText').style.paddingLeft = ps.margin+'px';
+  document.getElementById('presText').style.paddingRight = ps.margin+'px';
 }
 
+function stopPresent() {
+  ps.running = false;
+  if (ps.raf) cancelAnimationFrame(ps.raf);
+  if (ps.voiceOn) stopVoice();
+  document.getElementById('presEdit').style.display = 'none';
+  showPage('editorPage');
+}
+
+// scroll detection
+function bindScroll() {
+  let el = document.getElementById('presScroll');
+  el.onscroll = () => {
+    ps.userScroll = true;
+    clearTimeout(ps.scrollTO);
+    ps.scrollTO = setTimeout(() => { ps.userScroll = false; scrollToActive(); }, 2000);
+  };
+}
+
+// long press edit
+let lpT = null;
+document.addEventListener('DOMContentLoaded', () => {
+  let s = document.getElementById('presScroll');
+  s.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('line')) return;
+    lpT = setTimeout(() => {
+      let ed = document.getElementById('presEdit');
+      ed.dataset.wasRunning = ps.running?'1':'0';
+      ps.running = false; updatePlayBtn();
+      document.getElementById('presEditText').value = ps.lines.join('\n');
+      ed.style.display = 'block';
+    }, 2000);
+  });
+  s.addEventListener('touchend', () => clearTimeout(lpT));
+  s.addEventListener('touchmove', () => clearTimeout(lpT));
+});
+
+function finishEdit() {
+  let t = document.getElementById('presEditText').value;
+  ps.lines = t.split('\n'); ps.curLine = 0;
+  renderLines(); scrollToActive(); updateProgress();
+  document.getElementById('presEdit').style.display = 'none';
+  if (document.getElementById('presEdit').dataset.wasRunning==='1') {
+    ps.running = true; ps.lastT = performance.now();
+    updatePlayBtn(); requestAnimationFrame(scrollLoop);
+  }
+  let idx = scripts.findIndex(s=>s.id===curId);
+  if (idx>=0) { scripts[idx].content = t; saveScripts(); }
+}
+
+// ── SETTINGS ──
+function openSettings() {
+  document.getElementById('settingsOverlay').classList.add('show');
+  document.getElementById('mirrorSw').classList.toggle('on', ps.mirror);
+  document.getElementById('voiceSw').classList.toggle('on', ps.voiceOn);
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===ps.speed));
+}
+
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+
 function setSpeed(sp, btn) {
-  presenterState.speed = sp;
-  presenterState.charsPerMs = sp / 60000;
-  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+  ps.speed = sp; ps.cpm = sp/60000;
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
 
 function toggleMirror() {
-  presenterState.mirror = !presenterState.mirror;
-  document.getElementById('mirrorToggle').classList.toggle('on');
-  if (presenterState.mirror) document.getElementById('presenterText').classList.add('mirror');
-  else document.getElementById('presenterText').classList.remove('mirror');
+  ps.mirror = !ps.mirror;
+  document.getElementById('mirrorSw').classList.toggle('on');
+  document.getElementById('presText').classList.toggle('mirror', ps.mirror);
 }
 
-function updateMargin(v) {
-  presenterState.margin = parseInt(v);
-  applyPresenterMargins();
-}
+function updateMargin(v) { ps.margin = +v; applyMargins(); }
+function updateFont(v) { ps.fontSize = +v; document.getElementById('presText').style.fontSize = ps.fontSize+'px'; }
 
-function updateFontSize(v) {
-  presenterState.fontSize = parseInt(v);
-  document.getElementById('presenterText').style.fontSize = presenterState.fontSize + 'px';
-}
-
-// ── Voice ──
-let recognition = null;
+// ── VOICE ──
+let rec = null;
 function toggleVoice() {
-  presenterState.voiceOn = !presenterState.voiceOn;
-  document.getElementById('voiceToggle').classList.toggle('on');
-  if (presenterState.voiceOn) startVoice();
-  else stopVoice();
+  ps.voiceOn = !ps.voiceOn;
+  document.getElementById('voiceSw').classList.toggle('on');
+  ps.voiceOn ? startVoice() : stopVoice();
 }
-
 function startVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    toast('浏览器不支持语音识别');
-    presenterState.voiceOn = false;
-    document.getElementById('voiceToggle').classList.remove('on');
-    return;
+    toast('不支持语音'); ps.voiceOn = false; document.getElementById('voiceSw').classList.remove('on'); return;
   }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang = 'zh-CN';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.onresult = (e) => {
-    let transcript = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      transcript += e.results[i][0].transcript;
-    }
-    const fullText = presenterState.lines.join('');
-    const idx = fullText.indexOf(transcript.slice(-8));
-    if (idx >= 0) {
-      let charCount = 0;
-      for (let i = 0; i < presenterState.lines.length; i++) {
-        charCount += (presenterState.lines[i] || '').length;
-        if (charCount > idx) {
-          presenterState.currentLine = i;
-          presenterState.charOffset = idx - (charCount - (presenterState.lines[i] || '').length);
-          renderAllLines();
-          scrollToActiveLine();
-          updateProgress();
-          break;
-        }
+  rec = new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+  rec.lang='zh-CN'; rec.continuous=true; rec.interimResults=true;
+  rec.onresult = e => {
+    let t = ''; for (let i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript;
+    let full = ps.lines.join('');
+    let idx = full.indexOf(t.slice(-8));
+    if (idx>=0) {
+      let c=0;
+      for (let i=0;i<ps.lines.length;i++) {
+        c+=(ps.lines[i]||'').length;
+        if (c>idx) { ps.curLine=i; renderLines(); updateProgress(); scrollToActive(); break; }
       }
     }
   };
-  recognition.onerror = () => {};
-  recognition.start();
+  rec.start();
 }
+function stopVoice() { if(rec){rec.stop();rec=null;} }
 
-function stopVoice() {
-  if (recognition) { recognition.stop(); recognition = null; }
-}
-
-// ── Inline Edit ──
-let longPressTimer = null;
-document.addEventListener('DOMContentLoaded', () => {
-  const pc = document.getElementById('presenterScroll');
-  pc.addEventListener('touchstart', () => {
-    longPressTimer = setTimeout(() => {
-      const el = document.getElementById('presenterEdit');
-      el.dataset.wasRunning = presenterState.running ? '1' : '0';
-      presenterState.running = false;
-      document.getElementById('presenterEditText').value = presenterState.lines.join('\n');
-      el.style.display = 'block';
-    }, 2000);
-  });
-  pc.addEventListener('touchend', () => clearTimeout(longPressTimer));
-  pc.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-});
-
-function finishInlineEdit() {
-  const newText = document.getElementById('presenterEditText').value;
-  presenterState.lines = newText.split('\n');
-  presenterState.currentLine = 0;
-  presenterState.charOffset = 0;
-  renderAllLines();
-  scrollToActiveLine();
-  updateProgress();
-  document.getElementById('presenterEdit').style.display = 'none';
-  if (document.getElementById('presenterEdit').dataset.wasRunning === '1') {
-    presenterState.running = true;
-    presenterState.lastTime = performance.now();
-  }
-  const idx = scripts.findIndex(s => s.id === currentId);
-  if (idx >= 0) { scripts[idx].content = newText; saveScripts(); }
-}
-
-// ── Tap to pause/resume (only on non-line clicks) ──
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('presenterScroll').addEventListener('click', (e) => {
-    if (e.target.classList.contains('line')) return;
-    presenterState.running = !presenterState.running;
-    if (presenterState.running) presenterState.lastTime = performance.now();
-  });
-});
-
-// ── Helpers ──
+// ── HELPERS ──
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.body.style.background = (id === 'presenterPage') ? '#000' : '#F5F0EB';
-  if (id === 'presenterPage') bindScrollEvents();
+  document.body.style.background = id==='presenterPage'?'#000':'#F5F0EB';
+  if (id==='presenterPage') bindScroll();
 }
 
-function saveScripts() {
-  localStorage.setItem('gary_scripts', JSON.stringify(scripts));
-}
+function saveScripts() { localStorage.setItem('gary_scripts', JSON.stringify(scripts)); }
 
 function today() {
-  const d = new Date();
+  let d = new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
 function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1500);
+  let t = document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1500);
 }
 
 renderHome();
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>

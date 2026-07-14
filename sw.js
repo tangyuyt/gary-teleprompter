@@ -1,4 +1,4 @@
-const CACHE = 'gary-teleprompter-v2';
+const CACHE = 'gary-teleprompter-v3';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
