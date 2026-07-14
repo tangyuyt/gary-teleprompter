@@ -461,7 +461,14 @@ function jumpLine(i,e){
 
 function togglePlay(){
   ps.running=!ps.running;
-  if(ps.running){ ps.lastT=performance.now(); ps.charAccum=0; ps.userScroll=false; scrollToActive(); requestAnimationFrame(scrollLoop); }
+  if(ps.running){
+    ps.lastT=performance.now(); ps.charAccum=0;
+    ps.userScroll=false; scrollToActive();
+    if(ps.raf)cancelAnimationFrame(ps.raf);
+    ps.raf=requestAnimationFrame(scrollLoop);
+  } else {
+    if(ps.raf)cancelAnimationFrame(ps.raf);
+  }
   updatePlayBtn();
 }
 
@@ -476,10 +483,16 @@ function scrollLoop(now){
   if(ps.userScroll){ps.raf=requestAnimationFrame(scrollLoop);return;}
   let dt=now-ps.lastT; ps.lastT=now;
   ps.charAccum += dt * ps.cpm;
-  while(ps.charAccum>0 && ps.curLine<ps.lines.length){
-    let len=(ps.lines[ps.curLine]||'').length;
-    if(ps.charAccum<len){ps.charAccum=0;}
-    else{ps.charAccum-=len; ps.curLine++;}
+  let advLines = 0;
+  while(ps.charAccum > 0 && ps.curLine < ps.lines.length){
+    let len = (ps.lines[ps.curLine] || '').length || 1;
+    if(ps.charAccum >= len){
+      ps.charAccum -= len;
+      ps.curLine++;
+      advLines++;
+    } else {
+      break;
+    }
   }
   if(ps.curLine>=ps.lines.length)ps.curLine=0;
   renderLines(); updateProgress(); scrollToActive();
