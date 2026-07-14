@@ -13,27 +13,21 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #F5F0EB;
-      color: #3E2723;
+      background: #F5F0EB; color: #3E2723;
       min-height: 100vh;
-      user-select: none;
-      -webkit-user-select: none;
+      user-select: none; -webkit-user-select: none;
     }
     .page { display: none; min-height: 100vh; }
     .page.active { display: block; }
 
-    /* ── Home ── */
+    /* ── HOME ── */
     .home-header {
       background: #6F4E37; color: #fff;
-      padding: 14px 16px;
-      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
       position: sticky; top: 0; z-index: 10;
     }
     .home-title { font-size: 18px; font-weight: 700; letter-spacing: 2px; }
-    .home-header button {
-      background: none; border: none; color: #fff;
-      font-size: 14px; cursor: pointer; padding: 4px 8px;
-    }
+    .home-header button { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; }
     .script-list { padding: 12px; }
     .script-item {
       background: #fff; border-radius: 12px; padding: 14px;
@@ -71,7 +65,7 @@
       display: none; z-index: 30; cursor: pointer;
     }
 
-    /* ── Editor ── */
+    /* ── EDITOR ── */
     .editor-header {
       background: #6F4E37; color: #fff;
       padding: 12px 16px; display: flex; align-items: center; gap: 12px;
@@ -93,9 +87,7 @@
       font-size: 15px; line-height: 1.8; outline: none;
       font-family: inherit; color: #3E2723;
     }
-    .editor-tools {
-      display: flex; gap: 8px; padding: 0 12px 12px;
-    }
+    .editor-tools { display: flex; gap: 8px; padding: 0 12px 12px; }
     .tool-btn {
       flex: 1; padding: 12px; border-radius: 12px;
       border: none; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -110,17 +102,14 @@
     }
     .btn-start:active { background: #5D3D2A; }
 
-    /* ── Presenter ── */
+    /* ── PRESENTER ── */
     .pres-page { background: #000; }
     .pres-header {
       position: fixed; top: 0; left: 0; right: 0;
       display: flex; justify-content: space-between;
       padding: 12px 16px; z-index: 20;
     }
-    .pres-header button {
-      background: none; border: none; color: #666;
-      font-size: 20px; cursor: pointer;
-    }
+    .pres-header button { background: none; border: none; color: #666; font-size: 20px; cursor: pointer; }
     .pres-scroll {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       overflow-y: auto; z-index: 5;
@@ -134,7 +123,7 @@
     }
     .pres-text.mirror { transform: scaleX(-1); }
     .pres-text .line {
-      display: block; opacity: 0.5; padding: 2px 0;
+      display: block; opacity: 0.5; padding: 1px 0;
     }
     .pres-text .line.hi {
       opacity: 1; font-weight: 700;
@@ -174,7 +163,7 @@
       border-radius: 8px; font-size: 14px; cursor: pointer;
     }
 
-    /* ── Settings ── */
+    /* ── SETTINGS ── */
     .settings-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
       z-index: 25; display: none; align-items: flex-end;
@@ -186,9 +175,8 @@
     }
     .settings-panel h3 { font-size: 16px; margin-bottom: 16px; text-align: center; }
     .setting-row {
-      display: flex; justify-content: space-between;
-      align-items: center; padding: 12px 0;
-      border-bottom: 1px solid #333;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid #333;
     }
     .setting-label { font-size: 14px; }
     .setting-row input[type="range"] { width: 120px; accent-color: #6F4E37; }
@@ -200,8 +188,7 @@
     .speed-btn.active { background: #6F4E37; border-color: #6F4E37; color: #fff; }
     .toggle-switch {
       width: 48px; height: 28px; border-radius: 14px;
-      background: #555; position: relative; cursor: pointer;
-      transition: background 0.2s;
+      background: #555; position: relative; cursor: pointer; transition: background 0.2s;
     }
     .toggle-switch.on { background: #6F4E37; }
     .toggle-switch::after {
@@ -291,7 +278,7 @@
     </div>
     <div class="setting-row">
       <span class="setting-label">📐 页边距</span>
-      <input type="range" min="4" max="80" value="16" oninput="updateMargin(this.value)">
+      <input type="range" id="marginSlider" min="4" max="150" value="16" oninput="updateMargin(this.value)">
     </div>
     <div class="setting-row">
       <span class="setting-label">🔤 字体大小</span>
@@ -311,16 +298,82 @@
 // ── STATE ──
 let scripts = JSON.parse(localStorage.getItem('gary_scripts')||'[]');
 let curId = null;
-let selMode = false;
-let selSet = new Set();
+let selMode = false, selSet = new Set();
 
 let ps = {
   running: false, speed: 240, mirror: false,
   margin: 16, fontSize: 32, voiceOn: false,
-  lines: [], curLine: 0,
+  fullText: '', lines: [], curLine: 0,
   raf: null, lastT: 0, cpm: 240/60000,
   userScroll: false, scrollTO: null
 };
+
+// ── DYNAMIC LINE SPLIT ──
+function splitLines() {
+  let el = document.getElementById('presText');
+  let containerW = window.innerWidth - ps.margin * 2;
+  // Approximate: a Chinese char at fontSize px takes about fontSize px width
+  let charsPerLine = Math.floor(containerW / ps.fontSize);
+  if (charsPerLine < 1) charsPerLine = 1;
+  
+  let text = ps.fullText;
+  let result = [];
+  let i = 0;
+  while (i < text.length) {
+    let end = i + charsPerLine;
+    if (end >= text.length) {
+      result.push(text.slice(i));
+      break;
+    }
+    // Try to break at a natural boundary (punctuation or space)
+    let slice = text.slice(i, Math.min(end + 10, text.length));
+    let brk = slice.search(/[。！？；，、\n\r\s]/);
+    if (brk >= 0 && brk < charsPerLine) {
+      end = i + brk + 1;
+    }
+    result.push(text.slice(i, end));
+    i = end;
+  }
+  ps.lines = result;
+}
+
+function renderLines() {
+  splitLines();
+  let html = '';
+  for (let i=0; i<ps.lines.length; i++) {
+    html += `<span class="line${i===ps.curLine?' hi':''}" data-l="${i}" onclick="jumpLine(${i},event)">${esc(ps.lines[i]||'&nbsp;')}</span>`;
+  }
+  document.getElementById('presText').innerHTML = html;
+  document.getElementById('presText').style.fontSize = ps.fontSize+'px';
+}
+
+function reflowLines() {
+  splitLines();
+  // Adjust curLine proportionally
+  if (ps.lines.length > 0) {
+    let totalChars = ps.fullText.length;
+    let done = 0;
+    for (let i=0; i<Math.min(ps.curLine, ps.lines.length); i++) done += (ps.lines[i]||'').length;
+    let ratio = totalChars > 0 ? done / totalChars : 0;
+    let newTotal = 0;
+    for (let l of ps.lines) newTotal += (l||'').length;
+    let target = ratio * newTotal;
+    let acc = 0;
+    for (let i=0; i<ps.lines.length; i++) {
+      acc += (ps.lines[i]||'').length;
+      if (acc >= target) { ps.curLine = i; break; }
+    }
+  }
+  renderLines();
+  updateProgress();
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('presenterPage').classList.contains('active')) {
+    reflowLines();
+    scrollToActive();
+  }
+});
 
 // ── HOME ──
 function renderHome() {
@@ -328,14 +381,12 @@ function renderHome() {
   let btn = document.getElementById('headerBtn');
   let bar = document.getElementById('deleteBar');
   let fab = document.querySelector('.fab');
-
-  if (scripts.length === 0) {
+  if (scripts.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="ic">📂</div><p>还没有提词稿<br>点击 ＋ 新建</p></div>';
-    btn.style.display = 'none';
-    selMode = false; selSet.clear();
+    btn.style.display='none'; selMode=false; selSet.clear();
   } else {
-    btn.style.display = '';
-    list.innerHTML = scripts.map((s,i) => {
+    btn.style.display='';
+    list.innerHTML = scripts.map((s,i)=>{
       let sel = selSet.has(i);
       return `<div class="script-item${selMode?' inSelect':''}" onclick="${selMode?`toggleSel(${i},event)`:`openScript(${i})`}">
         <div class="cb${sel?' sel':''}"></div>
@@ -343,289 +394,259 @@ function renderHome() {
       </div>`;
     }).join('');
   }
-  btn.textContent = selMode ? '取消' : '选择';
-  bar.style.display = selMode ? 'block' : 'none';
-  if (selMode) fab.style.display = 'none'; else fab.style.display = '';
+  btn.textContent = selMode?'取消':'选择';
+  bar.style.display = selMode?'block':'none';
+  fab.style.display = selMode?'none':'';
 }
 
 function cc(t){ return t.replace(/\s/g,'').length; }
 function esc(s){ return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function toggleSelect() {
-  selMode = !selMode;
-  selSet.clear();
-  renderHome();
+function toggleSelect(){ selMode=!selMode; selSet.clear(); renderHome(); }
+function toggleSel(i,e){ e.stopPropagation(); if(selSet.has(i))selSet.delete(i); else selSet.add(i); renderHome(); }
+function doDelete(){
+  if(!selSet.size)return;
+  if(!confirm(`确定删除 ${selSet.size} 个？`))return;
+  let sorted=[...selSet].sort((a,b)=>b-a);
+  for(let i of sorted)scripts.splice(i,1);
+  selSet.clear(); selMode=false; saveScripts(); renderHome();
 }
-
-function toggleSel(i, e) {
-  e.stopPropagation();
-  if (selSet.has(i)) selSet.delete(i); else selSet.add(i);
-  renderHome();
-}
-
-function doDelete() {
-  if (selSet.size === 0) return;
-  if (!confirm(`确定删除 ${selSet.size} 个？`)) return;
-  let sorted = [...selSet].sort((a,b)=>b-a);
-  for (let i of sorted) scripts.splice(i,1);
-  selSet.clear();
-  selMode = false;
-  saveScripts();
-  renderHome();
-}
-
-function newScript() {
-  if (selMode) return;
-  curId = Date.now().toString();
-  document.getElementById('scriptTitle').value = '';
-  document.getElementById('scriptContent').value = '';
+function newScript(){
+  if(selMode)return;
+  curId=Date.now().toString();
+  document.getElementById('scriptTitle').value='';
+  document.getElementById('scriptContent').value='';
   showPage('editorPage');
 }
-
-function openScript(i) {
-  let s = scripts[i]; curId = s.id;
-  document.getElementById('scriptTitle').value = s.title;
-  document.getElementById('scriptContent').value = s.content;
+function openScript(i){
+  let s=scripts[i]; curId=s.id;
+  document.getElementById('scriptTitle').value=s.title;
+  document.getElementById('scriptContent').value=s.content;
   showPage('editorPage');
 }
 
 // ── EDITOR ──
-function saveCurrent() {
-  let title = document.getElementById('scriptTitle').value.trim()||'未命名';
-  let content = document.getElementById('scriptContent').value;
-  let idx = scripts.findIndex(s=>s.id===curId);
-  let obj = {id:curId,title,content,date:today()};
-  if (idx>=0) scripts[idx]=obj; else scripts.unshift(obj);
+function saveCurrent(){
+  let title=document.getElementById('scriptTitle').value.trim()||'未命名';
+  let content=document.getElementById('scriptContent').value;
+  let idx=scripts.findIndex(s=>s.id===curId);
+  let obj={id:curId,title,content,date:today()};
+  if(idx>=0)scripts[idx]=obj; else scripts.unshift(obj);
   saveScripts(); toast('已保存 ✅');
 }
-
-async function pasteClip() {
-  try {
-    let t = await navigator.clipboard.readText();
-    if (t) { document.getElementById('scriptContent').value = t; toast('已粘贴 📋'); }
-  } catch(e) { toast('请手动粘贴'); }
+async function pasteClip(){
+  try{let t=await navigator.clipboard.readText(); if(t){document.getElementById('scriptContent').value=t; toast('已粘贴 📋');}}
+  catch(e){toast('请手动粘贴');}
 }
-
-function goHome() {
-  saveCurrent();
-  showPage('homePage'); renderHome();
-}
+function goHome(){ saveCurrent(); showPage('homePage'); renderHome(); }
 
 // ── PRESENTER ──
-function startPresent() {
-  let content = document.getElementById('scriptContent').value;
-  if (!content.trim()) { toast('请先输入内容'); return; }
+function startPresent(){
+  let content=document.getElementById('scriptContent').value;
+  if(!content.trim()){toast('请先输入内容');return;}
   saveCurrent();
-  ps.lines = content.split('\n');
-  ps.curLine = 0; ps.cpm = ps.speed/60000;
-  ps.running = false; ps.userScroll = false;
+  ps.fullText = content;
+  ps.curLine=0; ps.cpm=ps.speed/60000;
+  ps.running=false; ps.userScroll=false;
   showPage('presenterPage');
   renderLines();
   applyMargins();
-  document.getElementById('presScroll').scrollTop = 0;
-  updatePlayBtn();
-  updateProgress();
+  document.getElementById('presScroll').scrollTop=0;
+  updatePlayBtn(); updateProgress();
 }
 
-function renderLines() {
-  let html = '';
-  for (let i=0; i<ps.lines.length; i++) {
-    html += `<span class="line${i===ps.curLine?' hi':''}" data-l="${i}" onclick="jumpLine(${i},event)">${ps.lines[i]||'&nbsp;'}</span>`;
-  }
-  document.getElementById('presText').innerHTML = html;
-  document.getElementById('presText').style.fontSize = ps.fontSize+'px';
-}
-
-function jumpLine(i, e) {
+function jumpLine(i,e){
   e.stopPropagation();
-  ps.curLine = i;
-  renderLines();
-  updateProgress();
-  scrollToActive();
+  ps.curLine=i; renderLines(); updateProgress(); scrollToActive();
 }
 
-function togglePlay() {
-  ps.running = !ps.running;
-  if (ps.running) {
-    ps.lastT = performance.now();
-    ps.userScroll = false;
-    scrollToActive();
-    requestAnimationFrame(scrollLoop);
-  }
+function togglePlay(){
+  ps.running=!ps.running;
+  if(ps.running){ ps.lastT=performance.now(); ps.userScroll=false; scrollToActive(); requestAnimationFrame(scrollLoop); }
   updatePlayBtn();
 }
 
-function updatePlayBtn() {
-  let btn = document.getElementById('playBtn');
-  if (ps.running) { btn.textContent = '⏸ 暂停'; btn.classList.add('paused'); }
-  else { btn.textContent = '▶ 播放'; btn.classList.remove('paused'); }
+function updatePlayBtn(){
+  let btn=document.getElementById('playBtn');
+  if(ps.running){ btn.textContent='⏸ 暂停'; btn.classList.add('paused'); }
+  else{ btn.textContent='▶ 播放'; btn.classList.remove('paused'); }
 }
 
-function scrollLoop(now) {
-  if (!ps.running) { ps.raf = requestAnimationFrame(scrollLoop); return; }
-  if (ps.userScroll) { ps.raf = requestAnimationFrame(scrollLoop); return; }
-  let dt = now - ps.lastT; ps.lastT = now;
-  let adv = dt * ps.cpm;
-  while (adv > 0 && ps.curLine < ps.lines.length) {
-    let len = (ps.lines[ps.curLine]||'').length;
-    if (adv < len) { adv = 0; }
-    else { adv -= len; ps.curLine++; }
+function scrollLoop(now){
+  if(!ps.running){ps.raf=requestAnimationFrame(scrollLoop);return;}
+  if(ps.userScroll){ps.raf=requestAnimationFrame(scrollLoop);return;}
+  let dt=now-ps.lastT; ps.lastT=now;
+  let adv=dt*ps.cpm;
+  while(adv>0 && ps.curLine<ps.lines.length){
+    let len=(ps.lines[ps.curLine]||'').length;
+    if(adv<len){adv=0;}
+    else{adv-=len; ps.curLine++;}
   }
-  if (ps.curLine >= ps.lines.length) ps.curLine = 0;
-  renderLines();
-  updateProgress();
-  scrollToActive();
-  ps.raf = requestAnimationFrame(scrollLoop);
+  if(ps.curLine>=ps.lines.length)ps.curLine=0;
+  renderLines(); updateProgress(); scrollToActive();
+  ps.raf=requestAnimationFrame(scrollLoop);
 }
 
-function updateProgress() {
-  let total = 0; for (let l of ps.lines) total += (l||'').length;
-  let done = 0; for (let i=0; i<ps.curLine; i++) done += (ps.lines[i]||'').length;
-  let pct = total>0 ? Math.min(100,(done/total)*100) : 0;
-  document.getElementById('progressFill').style.height = pct+'%';
+function updateProgress(){
+  let total=0; for(let l of ps.lines)total+=(l||'').length;
+  let done=0; for(let i=0;i<ps.curLine;i++)done+=(ps.lines[i]||'').length;
+  document.getElementById('progressFill').style.height=(total>0?Math.min(100,(done/total)*100):0)+'%';
 }
 
-let srAF = null;
-function scrollToActive() {
-  if (srAF) return;
-  srAF = requestAnimationFrame(() => {
-    srAF = null;
-    if (ps.userScroll) return;
-    let el = document.querySelector('#presText .line.hi');
-    if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+let srAF=null;
+function scrollToActive(){
+  if(srAF)return;
+  srAF=requestAnimationFrame(()=>{
+    srAF=null;
+    if(ps.userScroll)return;
+    let el=document.querySelector('#presText .line.hi');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   });
 }
 
-function applyMargins() {
-  document.getElementById('presText').style.paddingLeft = ps.margin+'px';
-  document.getElementById('presText').style.paddingRight = ps.margin+'px';
+function applyMargins(){
+  document.getElementById('presText').style.paddingLeft=ps.margin+'px';
+  document.getElementById('presText').style.paddingRight=ps.margin+'px';
+  // Re-split when margin changes
+  if(document.getElementById('presenterPage').classList.contains('active')){
+    reflowLines();
+    scrollToActive();
+  }
 }
 
-function stopPresent() {
-  ps.running = false;
-  if (ps.raf) cancelAnimationFrame(ps.raf);
-  if (ps.voiceOn) stopVoice();
-  document.getElementById('presEdit').style.display = 'none';
+function stopPresent(){
+  ps.running=false;
+  if(ps.raf)cancelAnimationFrame(ps.raf);
+  if(ps.voiceOn)stopVoice();
+  document.getElementById('presEdit').style.display='none';
   showPage('editorPage');
 }
 
-// scroll detection
-function bindScroll() {
-  let el = document.getElementById('presScroll');
-  el.onscroll = () => {
-    ps.userScroll = true;
+function bindScroll(){
+  let el=document.getElementById('presScroll');
+  el.onscroll=()=>{
+    ps.userScroll=true;
     clearTimeout(ps.scrollTO);
-    ps.scrollTO = setTimeout(() => { ps.userScroll = false; scrollToActive(); }, 2000);
+    ps.scrollTO=setTimeout(()=>{ps.userScroll=false;scrollToActive();},2000);
   };
 }
 
-// long press edit
-let lpT = null;
-document.addEventListener('DOMContentLoaded', () => {
-  let s = document.getElementById('presScroll');
-  s.addEventListener('touchstart', (e) => {
-    if (e.target.classList.contains('line')) return;
-    lpT = setTimeout(() => {
-      let ed = document.getElementById('presEdit');
-      ed.dataset.wasRunning = ps.running?'1':'0';
-      ps.running = false; updatePlayBtn();
-      document.getElementById('presEditText').value = ps.lines.join('\n');
-      ed.style.display = 'block';
-    }, 2000);
+// LONG PRESS EDIT
+let lpT=null;
+document.addEventListener('DOMContentLoaded',()=>{
+  let s=document.getElementById('presScroll');
+  s.addEventListener('touchstart',(e)=>{
+    if(e.target.classList.contains('line'))return;
+    lpT=setTimeout(()=>{
+      let ed=document.getElementById('presEdit');
+      ed.dataset.wr=ps.running?'1':'0';
+      ps.running=false; updatePlayBtn();
+      document.getElementById('presEditText').value=ps.fullText;
+      ed.style.display='block';
+    },2000);
   });
-  s.addEventListener('touchend', () => clearTimeout(lpT));
-  s.addEventListener('touchmove', () => clearTimeout(lpT));
+  s.addEventListener('touchend',()=>clearTimeout(lpT));
+  s.addEventListener('touchmove',()=>clearTimeout(lpT));
 });
 
-function finishEdit() {
-  let t = document.getElementById('presEditText').value;
-  ps.lines = t.split('\n'); ps.curLine = 0;
+function finishEdit(){
+  let t=document.getElementById('presEditText').value;
+  ps.fullText=t; ps.curLine=0;
   renderLines(); scrollToActive(); updateProgress();
-  document.getElementById('presEdit').style.display = 'none';
-  if (document.getElementById('presEdit').dataset.wasRunning==='1') {
-    ps.running = true; ps.lastT = performance.now();
+  document.getElementById('presEdit').style.display='none';
+  if(document.getElementById('presEdit').dataset.wr==='1'){
+    ps.running=true; ps.lastT=performance.now();
     updatePlayBtn(); requestAnimationFrame(scrollLoop);
   }
-  let idx = scripts.findIndex(s=>s.id===curId);
-  if (idx>=0) { scripts[idx].content = t; saveScripts(); }
+  let idx=scripts.findIndex(s=>s.id===curId);
+  if(idx>=0){scripts[idx].content=t; saveScripts();}
 }
 
 // ── SETTINGS ──
-function openSettings() {
+function openSettings(){
   document.getElementById('settingsOverlay').classList.add('show');
-  document.getElementById('mirrorSw').classList.toggle('on', ps.mirror);
-  document.getElementById('voiceSw').classList.toggle('on', ps.voiceOn);
+  document.getElementById('mirrorSw').classList.toggle('on',ps.mirror);
+  document.getElementById('voiceSw').classList.toggle('on',ps.voiceOn);
   document.querySelectorAll('.speed-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===ps.speed));
+  // Sync margin slider
+  document.getElementById('marginSlider').value = ps.margin;
 }
 
-function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('show'); }
 
-function setSpeed(sp, btn) {
-  ps.speed = sp; ps.cpm = sp/60000;
+function setSpeed(sp,btn){
+  ps.speed=sp; ps.cpm=sp/60000;
   document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
 
-function toggleMirror() {
-  ps.mirror = !ps.mirror;
+function toggleMirror(){
+  ps.mirror=!ps.mirror;
   document.getElementById('mirrorSw').classList.toggle('on');
-  document.getElementById('presText').classList.toggle('mirror', ps.mirror);
+  document.getElementById('presText').classList.toggle('mirror',ps.mirror);
 }
 
-function updateMargin(v) { ps.margin = +v; applyMargins(); }
-function updateFont(v) { ps.fontSize = +v; document.getElementById('presText').style.fontSize = ps.fontSize+'px'; }
+function updateMargin(v){
+  ps.margin=+v;
+  applyMargins();
+}
+
+function updateFont(v){
+  ps.fontSize=+v;
+  document.getElementById('presText').style.fontSize=ps.fontSize+'px';
+  if(document.getElementById('presenterPage').classList.contains('active')){
+    reflowLines();
+    scrollToActive();
+  }
+}
 
 // ── VOICE ──
-let rec = null;
-function toggleVoice() {
-  ps.voiceOn = !ps.voiceOn;
+let rec=null;
+function toggleVoice(){
+  ps.voiceOn=!ps.voiceOn;
   document.getElementById('voiceSw').classList.toggle('on');
-  ps.voiceOn ? startVoice() : stopVoice();
+  ps.voiceOn?startVoice():stopVoice();
 }
-function startVoice() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    toast('不支持语音'); ps.voiceOn = false; document.getElementById('voiceSw').classList.remove('on'); return;
+function startVoice(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    toast('不支持语音'); ps.voiceOn=false; document.getElementById('voiceSw').classList.remove('on'); return;
   }
-  rec = new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+  rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
   rec.lang='zh-CN'; rec.continuous=true; rec.interimResults=true;
-  rec.onresult = e => {
-    let t = ''; for (let i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript;
-    let full = ps.lines.join('');
-    let idx = full.indexOf(t.slice(-8));
-    if (idx>=0) {
+  rec.onresult=e=>{
+    let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
+    let full=ps.lines.join('');
+    let idx=full.indexOf(t.slice(-8));
+    if(idx>=0){
       let c=0;
-      for (let i=0;i<ps.lines.length;i++) {
+      for(let i=0;i<ps.lines.length;i++){
         c+=(ps.lines[i]||'').length;
-        if (c>idx) { ps.curLine=i; renderLines(); updateProgress(); scrollToActive(); break; }
+        if(c>idx){ps.curLine=i;renderLines();updateProgress();scrollToActive();break;}
       }
     }
   };
   rec.start();
 }
-function stopVoice() { if(rec){rec.stop();rec=null;} }
+function stopVoice(){if(rec){rec.stop();rec=null;}}
 
 // ── HELPERS ──
-function showPage(id) {
+function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.body.style.background = id==='presenterPage'?'#000':'#F5F0EB';
-  if (id==='presenterPage') bindScroll();
+  document.body.style.background=id==='presenterPage'?'#000':'#F5F0EB';
+  if(id==='presenterPage')bindScroll();
 }
-
-function saveScripts() { localStorage.setItem('gary_scripts', JSON.stringify(scripts)); }
-
-function today() {
-  let d = new Date();
+function saveScripts(){localStorage.setItem('gary_scripts',JSON.stringify(scripts));}
+function today(){
+  let d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-
-function toast(msg) {
-  let t = document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+function toast(msg){
+  let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),1500);
 }
 
 renderHome();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
