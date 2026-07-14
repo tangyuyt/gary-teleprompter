@@ -84,6 +84,7 @@
       text-align: center;
       font-size: 16px; font-weight: 600;
       display: none; z-index: 30;
+      cursor: pointer;
     }
 
     /* ── Editor Page ── */
@@ -138,19 +139,38 @@
       padding: 12px 16px; z-index: 20;
     }
     .presenter-header .icon-btn { color: #666; }
-    .presenter-content {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 60px 0;
+    .presenter-scroll {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      overflow-y: auto;
+      z-index: 5;
+      -webkit-overflow-scrolling: touch;
     }
     .presenter-text {
-      color: #fff; text-align: center; line-height: 1.6;
-      transition: transform 0.3s;
+      color: #fff;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 100vh;
+      padding-top: 70px;
+      padding-bottom: 60vh;
     }
     .presenter-text.mirror { transform: scaleX(-1); }
+    .presenter-text .line {
+      display: block;
+      opacity: 0.5;
+      padding: 2px 0;
+      transition: opacity 0.3s;
+    }
+    .presenter-text .line.active {
+      opacity: 1;
+      font-weight: 700;
+    }
+    .presenter-text .line.past { opacity: 0.2; }
     .progress-bar {
       position: fixed; right: 0; top: 0; bottom: 0;
       width: 3px; background: rgba(255,255,255,0.1);
-      z-index: 15;
+      z-index: 15; pointer-events: none;
     }
     .progress-fill {
       position: absolute; top: 0; left: 0; right: 0;
@@ -190,7 +210,7 @@
       border-bottom: 1px solid #333;
     }
     .setting-label { font-size: 14px; }
-    .setting-row input[type="range"] { width: 120px; }
+    .setting-row input[type="range"] { width: 120px; accent-color: #6F4E37; }
     .speed-btns { display: flex; gap: 6px; flex-wrap: wrap; }
     .speed-btn {
       padding: 6px 12px; border-radius: 8px; border: 1px solid #555;
@@ -215,7 +235,6 @@
       border-radius: 10px; font-size: 14px; cursor: pointer;
     }
 
-    /* Toast */
     .toast {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
       background: rgba(0,0,0,0.8); color: #fff; padding: 10px 24px;
@@ -228,12 +247,11 @@
 </head>
 <body>
 
-<!-- ===== HOME PAGE ===== -->
 <div class="page active" id="homePage">
   <div class="home-header">
     <span class="home-title">📽 Gary提词器</span>
-    <div class="home-actions">
-      <button class="icon-btn select-btn" onclick="toggleSelectMode()" id="selectToggle">选择</button>
+    <div class="home-actions" id="homeActions">
+      <button class="icon-btn select-btn" id="selectToggle" onclick="toggleSelectMode()">选择</button>
     </div>
   </div>
   <div class="script-list" id="scriptList"></div>
@@ -241,7 +259,6 @@
   <div class="delete-bar" id="deleteBar" onclick="deleteSelected()">🗑 删除所选</div>
 </div>
 
-<!-- ===== EDITOR PAGE ===== -->
 <div class="page" id="editorPage">
   <div class="editor-header">
     <span class="back" onclick="goHome()">←</span>
@@ -257,14 +274,13 @@
   <button class="btn-start" onclick="startPresent()">🎤 开始提词</button>
 </div>
 
-<!-- ===== PRESENTER PAGE ===== -->
 <div class="page presenter-page" id="presenterPage">
   <div class="presenter-header">
     <button class="icon-btn" onclick="stopPresent()">←</button>
     <button class="icon-btn" onclick="openSettings()">⚙</button>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="presenter-content" id="presenterContent">
+  <div class="presenter-scroll" id="presenterScroll">
     <div class="presenter-text" id="presenterText"></div>
   </div>
   <div class="presenter-edit" id="presenterEdit">
@@ -273,13 +289,12 @@
   </div>
 </div>
 
-<!-- ===== SETTINGS ===== -->
-<div class="settings-overlay" id="settingsOverlay">
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()">
   <div class="settings-panel" onclick="event.stopPropagation()">
     <h3>⚙ 设置</h3>
 
     <div class="setting-row">
-      <span class="setting-label">播放速度</span>
+      <span class="setting-label">播放速度（字/分）</span>
       <div class="speed-btns">
         <button class="speed-btn" data-speed="120" onclick="setSpeed(120,this)">120</button>
         <button class="speed-btn" data-speed="180" onclick="setSpeed(180,this)">180</button>
@@ -296,12 +311,12 @@
 
     <div class="setting-row">
       <span class="setting-label">📐 页边距</span>
-      <input type="range" min="10" max="40" value="25" oninput="updateMargin(this.value)">
+      <input type="range" min="8" max="48" value="16" oninput="updateMargin(this.value)">
     </div>
 
     <div class="setting-row">
       <span class="setting-label">🔤 字体大小</span>
-      <input type="range" min="24" max="60" value="36" oninput="updateFontSize(this.value)">
+      <input type="range" min="20" max="52" value="32" oninput="updateFontSize(this.value)">
     </div>
 
     <div class="setting-row">
@@ -324,17 +339,19 @@ let selectedIds = new Set();
 
 let presenterState = {
   running: false,
-  speed: 240, // 字/分
+  speed: 240,
   mirror: false,
-  margin: 25,
-  fontSize: 36,
+  margin: 16,
+  fontSize: 32,
   voiceOn: false,
-  words: [],
-  currentWord: 0,
+  lines: [],
+  currentLine: 0,
+  charOffset: 0,
   rafId: null,
   lastTime: 0,
   charsPerMs: 240 / 60000,
-  longPressTimer: null,
+  userScrolling: false,
+  scrollTimeout: null,
 };
 
 // ── Home ──
@@ -342,7 +359,13 @@ function renderHome() {
   const el = document.getElementById('scriptList');
   if (scripts.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="icon">📂</div><p>还没有提词稿<br>点击 ＋ 新建</p></div>';
-    return;
+    document.getElementById('selectToggle').style.display = 'none';
+  } else {
+    document.getElementById('selectToggle').style.display = '';
+  }
+  if (selectMode && scripts.length === 0) {
+    selectMode = false;
+    selectedIds.clear();
   }
   el.innerHTML = scripts.map((s, i) => `
     <div class="script-item ${selectMode ? 'selecting' : ''}" onclick="${selectMode ? `toggleCheck(${i},event)` : `openScript(${i})`}">
@@ -353,7 +376,15 @@ function renderHome() {
       </div>
     </div>
   `).join('');
-  document.getElementById('selectToggle').textContent = selectMode ? '取消' : '选择';
+  
+  const actions = document.getElementById('homeActions');
+  if (selectMode) {
+    actions.innerHTML = '<button class="icon-btn select-btn" onclick="toggleSelectMode()">取消</button>';
+  } else {
+    actions.innerHTML = '<button class="icon-btn select-btn" id="selectToggle" onclick="toggleSelectMode()">选择</button>';
+    if (scripts.length === 0) document.getElementById('selectToggle').style.display = 'none';
+  }
+  
   document.getElementById('deleteBar').style.display = selectMode ? 'block' : 'none';
 }
 
@@ -436,88 +467,106 @@ function startPresent() {
   const content = document.getElementById('scriptContent').value;
   if (!content.trim()) { toast('请先输入内容'); return; }
   saveCurrent();
-  const words = splitForDisplay(content);
-  presenterState.words = words;
-  presenterState.currentWord = 0;
+  presenterState.lines = content.split('\n');
+  presenterState.currentLine = 0;
+  presenterState.charOffset = 0;
   presenterState.charsPerMs = presenterState.speed / 60000;
   presenterState.running = true;
   presenterState.lastTime = performance.now();
+  presenterState.userScrolling = false;
   showPage('presenterPage');
-  updatePresenterText();
-  applyPresenterStyle();
-  document.body.style.background = '#000';
+  renderAllLines();
+  applyPresenterMargins();
+  scrollToActiveLine();
+  document.getElementById('presenterScroll').scrollTop = 0;
   requestAnimationFrame(scrollLoop);
 }
 
-function splitForDisplay(text) {
-  // Split into display chunks (~8-12 chars each for teleprompter feel)
-  const clean = text.replace(/\n{2,}/g, '\n\n').trim();
-  const chunks = [];
-  let i = 0;
-  while (i < clean.length) {
-    let end = i + 10;
-    if (end < clean.length) {
-      // Try to break at punctuation or space
-      const slice = clean.slice(i, end + 5);
-      const m = slice.match(/[，。！？；、\n]/);
-      if (m) end = i + m.index + 1;
-    }
-    chunks.push(clean.slice(i, end));
-    i = end;
+function renderAllLines() {
+  const lines = presenterState.lines;
+  let html = '';
+  for (let i = 0; i < lines.length; i++) {
+    let cls = '';
+    if (i < presenterState.currentLine) cls = 'past';
+    else if (i === presenterState.currentLine) cls = 'active';
+    html += `<span class="line ${cls}" data-line="${i}" onclick="jumpToLine(${i}, event)">${lines[i] || '&nbsp;'}</span>`;
   }
-  return chunks;
+  document.getElementById('presenterText').innerHTML = html;
+  document.getElementById('presenterText').style.fontSize = presenterState.fontSize + 'px';
+}
+
+let scrollRAF = null;
+function scrollToActiveLine() {
+  if (scrollRAF) return;
+  scrollRAF = requestAnimationFrame(() => {
+    scrollRAF = null;
+    if (presenterState.userScrolling) return;
+    const activeEl = document.querySelector('.presenter-text .line.active');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
+function jumpToLine(idx, e) {
+  e.stopPropagation();
+  presenterState.currentLine = idx;
+  presenterState.charOffset = 0;
+  presenterState.lastTime = performance.now();
+  // Count chars in previous lines
+  let chars = 0;
+  for (let i = 0; i < idx; i++) chars += (presenterState.lines[i] || '').length;
+  presenterState.charOffset = chars;
+  renderAllLines();
+  updateProgress();
 }
 
 function scrollLoop(now) {
   if (!presenterState.running) { presenterState.rafId = requestAnimationFrame(scrollLoop); return; }
+  if (presenterState.userScrolling) { presenterState.rafId = requestAnimationFrame(scrollLoop); return; }
+  
   const dt = now - presenterState.lastTime;
   presenterState.lastTime = now;
   const charsToAdvance = dt * presenterState.charsPerMs;
-  presenterState.currentWord += charsToAdvance;
-  const totalChars = presenterState.words.reduce((a,w)=>a+w.length,0);
-  if (presenterState.currentWord >= totalChars) {
-    presenterState.currentWord = 0;
+  
+  // Advance through lines
+  let remaining = charsToAdvance;
+  while (remaining > 0 && presenterState.currentLine < presenterState.lines.length) {
+    const lineLen = (presenterState.lines[presenterState.currentLine] || '').length;
+    const leftInLine = lineLen - presenterState.charOffset;
+    if (remaining < leftInLine) {
+      presenterState.charOffset += remaining;
+      remaining = 0;
+    } else {
+      remaining -= leftInLine;
+      presenterState.currentLine++;
+      presenterState.charOffset = 0;
+      if (presenterState.currentLine >= presenterState.lines.length) {
+        presenterState.currentLine = 0;
+        presenterState.charOffset = 0;
+      }
+      renderAllLines();
+      scrollToActiveLine();
+    }
   }
-  updatePresenterText();
+  updateProgress();
   presenterState.rafId = requestAnimationFrame(scrollLoop);
 }
 
-function updatePresenterText() {
-  const { words, currentWord } = presenterState;
-  // Find which chunk we're in
-  let accumulated = 0;
-  let currentChunk = 0;
-  for (let i = 0; i < words.length; i++) {
-    accumulated += words[i].length;
-    if (accumulated > currentWord) { currentChunk = i; break; }
-  }
-  // Show surrounding chunks
-  const start = Math.max(0, currentChunk - 1);
-  const end = Math.min(words.length, currentChunk + 4);
-  const visible = words.slice(start, end).join('');
-  
-  // Highlight active line
-  const activeLine = words[currentChunk] || '';
-  const before = words.slice(start, currentChunk).join('');
-  const after = words.slice(currentChunk + 1, end).join('');
-
-  document.getElementById('presenterText').innerHTML =
-    '<div style="opacity:0.3;font-size:' + (presenterState.fontSize*0.7) + 'px">' + esc(before) + '</div>' +
-    '<div style="font-size:' + presenterState.fontSize + 'px;font-weight:700;margin:8px 0">' + esc(activeLine) + '</div>' +
-    '<div style="opacity:0.3;font-size:' + (presenterState.fontSize*0.7) + 'px">' + esc(after) + '</div>';
-
-  // Progress bar
-  const totalChars = words.reduce((a,w)=>a+w.length,0);
-  const pct = totalChars > 0 ? Math.min(100, (currentWord / totalChars) * 100) : 0;
+function updateProgress() {
+  let totalChars = 0;
+  for (const l of presenterState.lines) totalChars += (l || '').length;
+  let doneChars = 0;
+  for (let i = 0; i < presenterState.currentLine; i++) doneChars += (presenterState.lines[i] || '').length;
+  doneChars += presenterState.charOffset;
+  const pct = totalChars > 0 ? Math.min(100, (doneChars / totalChars) * 100) : 0;
   document.getElementById('progressFill').style.height = pct + '%';
 }
 
-function applyPresenterStyle() {
-  const el = document.getElementById('presenterText');
-  const margin = presenterState.margin;
-  document.getElementById('presenterContent').style.padding = '60px ' + margin + 'px';
-  if (presenterState.mirror) el.classList.add('mirror');
-  else el.classList.remove('mirror');
+function applyPresenterMargins() {
+  const m = presenterState.margin;
+  document.getElementById('presenterText').style.paddingLeft = m + 'px';
+  document.getElementById('presenterText').style.paddingRight = m + 'px';
 }
 
 function stopPresent() {
@@ -528,15 +577,34 @@ function stopPresent() {
   showPage('editorPage');
 }
 
+// ── User scroll detection ──
+const scrollEl = () => document.getElementById('presenterScroll');
+scrollEl._ref = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Use a mutation observer or just bind after the element exists
+});
+
+// We'll bind scroll events after presenter page shows
+function bindScrollEvents() {
+  const el = document.getElementById('presenterScroll');
+  el.onscroll = () => {
+    presenterState.userScrolling = true;
+    clearTimeout(presenterState.scrollTimeout);
+    presenterState.scrollTimeout = setTimeout(() => {
+      presenterState.userScrolling = false;
+      scrollToActiveLine();
+    }, 2000);
+  };
+}
+
 // ── Settings ──
 function openSettings() {
   document.getElementById('settingsOverlay').classList.add('show');
-  // Sync toggles
   if (presenterState.mirror) document.getElementById('mirrorToggle').classList.add('on');
   else document.getElementById('mirrorToggle').classList.remove('on');
   if (presenterState.voiceOn) document.getElementById('voiceToggle').classList.add('on');
   else document.getElementById('voiceToggle').classList.remove('on');
-  // Speed buttons
   document.querySelectorAll('.speed-btn').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.speed) === presenterState.speed);
   });
@@ -556,12 +624,22 @@ function setSpeed(sp, btn) {
 function toggleMirror() {
   presenterState.mirror = !presenterState.mirror;
   document.getElementById('mirrorToggle').classList.toggle('on');
-  applyPresenterStyle();
+  if (presenterState.mirror) document.getElementById('presenterText').classList.add('mirror');
+  else document.getElementById('presenterText').classList.remove('mirror');
 }
 
-function updateMargin(v) { presenterState.margin = parseInt(v); applyPresenterStyle(); }
-function updateFontSize(v) { presenterState.fontSize = parseInt(v); updatePresenterText(); }
+function updateMargin(v) {
+  presenterState.margin = parseInt(v);
+  applyPresenterMargins();
+}
 
+function updateFontSize(v) {
+  presenterState.fontSize = parseInt(v);
+  document.getElementById('presenterText').style.fontSize = presenterState.fontSize + 'px';
+}
+
+// ── Voice ──
+let recognition = null;
 function toggleVoice() {
   presenterState.voiceOn = !presenterState.voiceOn;
   document.getElementById('voiceToggle').classList.toggle('on');
@@ -569,12 +647,11 @@ function toggleVoice() {
   else stopVoice();
 }
 
-// ── Voice Recognition ──
-let recognition = null;
 function startVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
     toast('浏览器不支持语音识别');
     presenterState.voiceOn = false;
+    document.getElementById('voiceToggle').classList.remove('on');
     return;
   }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -587,14 +664,24 @@ function startVoice() {
     for (let i = e.resultIndex; i < e.results.length; i++) {
       transcript += e.results[i][0].transcript;
     }
-    // Find matching position in text
-    const fullText = presenterState.words.join('');
-    const idx = fullText.indexOf(transcript.slice(-6));
+    const fullText = presenterState.lines.join('');
+    const idx = fullText.indexOf(transcript.slice(-8));
     if (idx >= 0) {
-      presenterState.currentWord = idx;
+      let charCount = 0;
+      for (let i = 0; i < presenterState.lines.length; i++) {
+        charCount += (presenterState.lines[i] || '').length;
+        if (charCount > idx) {
+          presenterState.currentLine = i;
+          presenterState.charOffset = idx - (charCount - (presenterState.lines[i] || '').length);
+          renderAllLines();
+          scrollToActiveLine();
+          updateProgress();
+          break;
+        }
+      }
     }
   };
-  recognition.onerror = () => { /* silent */ };
+  recognition.onerror = () => {};
   recognition.start();
 }
 
@@ -602,57 +689,55 @@ function stopVoice() {
   if (recognition) { recognition.stop(); recognition = null; }
 }
 
-// ── Inline Edit (long press) ──
+// ── Inline Edit ──
 let longPressTimer = null;
-document.getElementById('presenterContent').addEventListener('touchstart', (e) => {
-  longPressTimer = setTimeout(() => {
-    // Stop scrolling temporarily
-    const wasRunning = presenterState.running;
-    presenterState.running = false;
-    document.getElementById('presenterEditText').value = presenterState.words.join('');
-    document.getElementById('presenterEdit').style.display = 'block';
-    if (wasRunning) {
-      document.getElementById('presenterEdit').dataset.wasRunning = '1';
-    }
-  }, 2000);
-});
-document.getElementById('presenterContent').addEventListener('touchend', () => {
-  clearTimeout(longPressTimer);
-});
-document.getElementById('presenterContent').addEventListener('touchmove', () => {
-  clearTimeout(longPressTimer);
+document.addEventListener('DOMContentLoaded', () => {
+  const pc = document.getElementById('presenterScroll');
+  pc.addEventListener('touchstart', () => {
+    longPressTimer = setTimeout(() => {
+      const el = document.getElementById('presenterEdit');
+      el.dataset.wasRunning = presenterState.running ? '1' : '0';
+      presenterState.running = false;
+      document.getElementById('presenterEditText').value = presenterState.lines.join('\n');
+      el.style.display = 'block';
+    }, 2000);
+  });
+  pc.addEventListener('touchend', () => clearTimeout(longPressTimer));
+  pc.addEventListener('touchmove', () => clearTimeout(longPressTimer));
 });
 
 function finishInlineEdit() {
   const newText = document.getElementById('presenterEditText').value;
-  presenterState.words = splitForDisplay(newText);
-  presenterState.currentWord = 0;
+  presenterState.lines = newText.split('\n');
+  presenterState.currentLine = 0;
+  presenterState.charOffset = 0;
+  renderAllLines();
+  scrollToActiveLine();
+  updateProgress();
   document.getElementById('presenterEdit').style.display = 'none';
-  // Resume if was running
   if (document.getElementById('presenterEdit').dataset.wasRunning === '1') {
     presenterState.running = true;
     presenterState.lastTime = performance.now();
-    document.getElementById('presenterEdit').dataset.wasRunning = '0';
   }
-  updatePresenterText();
-  // Also update the script in storage
   const idx = scripts.findIndex(s => s.id === currentId);
   if (idx >= 0) { scripts[idx].content = newText; saveScripts(); }
 }
 
-// ── Tap to pause/resume ──
-document.getElementById('presenterContent').addEventListener('click', (e) => {
-  // Don't toggle if interacting with edit panel or if long press was triggered
-  if (e.target.closest('#presenterEdit')) return;
-  presenterState.running = !presenterState.running;
-  if (presenterState.running) presenterState.lastTime = performance.now();
+// ── Tap to pause/resume (only on non-line clicks) ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('presenterScroll').addEventListener('click', (e) => {
+    if (e.target.classList.contains('line')) return;
+    presenterState.running = !presenterState.running;
+    if (presenterState.running) presenterState.lastTime = performance.now();
+  });
 });
 
 // ── Helpers ──
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if (id !== 'presenterPage') document.body.style.background = '#F5F0EB';
+  document.body.style.background = (id === 'presenterPage') ? '#000' : '#F5F0EB';
+  if (id === 'presenterPage') bindScrollEvents();
 }
 
 function saveScripts() {
@@ -671,9 +756,7 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 1500);
 }
 
-// ── Init ──
 renderHome();
-
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
