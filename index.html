@@ -443,10 +443,14 @@ function startPresent(){
   let content=document.getElementById('scriptContent').value;
   if(!content.trim()){toast('请先输入内容');return;}
   saveCurrent();
-  ps.fullText = content;
+  // Add blank lines to center text vertically
+  ps.fullText = '\n\n\n\n\n\n\n\n\n\n\n\n' + content;
   ps.curLine=0; ps.cpm=ps.speed/60000;
   ps.running=false; ps.userScroll=false;
   showPage('presenterPage');
+  renderLines();
+  // Skip leading empty lines
+  while(ps.curLine < ps.lines.length && (ps.lines[ps.curLine]||'').trim()==='') ps.curLine++;
   renderLines();
   applyMargins();
   // Position first line at 35% from top for natural reading position
@@ -576,7 +580,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 function finishEdit(){
   let t=document.getElementById('presEditText').value;
-  ps.fullText=t; ps.curLine=0;
+  ps.fullText='\n\n\n\n\n\n\n\n\n\n\n\n'+t; ps.curLine=0;
   renderLines(); scrollToActive(); updateProgress();
   document.getElementById('presEdit').style.display='none';
   if(document.getElementById('presEdit').dataset.wr==='1'){
