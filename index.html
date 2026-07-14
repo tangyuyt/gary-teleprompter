@@ -119,7 +119,8 @@
       color: #fff; line-height: 1.8;
       white-space: pre-wrap; word-break: break-all;
       min-height: 100vh;
-      padding-top: 70px; padding-bottom: 60vh;
+      padding-top: 50vh;
+      padding-bottom: 50vh;
     }
     .pres-text.mirror { transform: scaleX(-1); }
     .pres-text .line {
@@ -443,14 +444,10 @@ function startPresent(){
   let content=document.getElementById('scriptContent').value;
   if(!content.trim()){toast('请先输入内容');return;}
   saveCurrent();
-  // Add blank lines to center text vertically
-  ps.fullText = '\n\n\n\n\n\n\n\n\n\n\n\n' + content;
+  ps.fullText = content;
   ps.curLine=0; ps.cpm=ps.speed/60000;
   ps.running=false; ps.userScroll=false;
   showPage('presenterPage');
-  renderLines();
-  // Skip leading empty lines
-  while(ps.curLine < ps.lines.length && (ps.lines[ps.curLine]||'').trim()==='') ps.curLine++;
   renderLines();
   applyMargins();
   // Position first line at 35% from top for natural reading position
@@ -580,7 +577,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 function finishEdit(){
   let t=document.getElementById('presEditText').value;
-  ps.fullText='\n\n\n\n\n\n\n\n\n\n\n\n'+t; ps.curLine=0;
+  ps.fullText=t; ps.curLine=0;
   renderLines(); scrollToActive(); updateProgress();
   document.getElementById('presEdit').style.display='none';
   if(document.getElementById('presEdit').dataset.wr==='1'){
