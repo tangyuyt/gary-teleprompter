@@ -7,11 +7,11 @@
   "theme_color": "#000000",
   "description": "专业演讲提词器 - 支持速度调节、镜像、语音跟踪",
   "icons": [{
-    "src": "icon-192.png",
+    "src": "gary-icon-192.png",
     "sizes": "192x192",
     "type": "image/png"
   }, {
-    "src": "icon-512.png",
+    "src": "gary-icon-512.png",
     "sizes": "512x512",
     "type": "image/png"
   }]
