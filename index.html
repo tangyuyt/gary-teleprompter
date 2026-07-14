@@ -265,11 +265,15 @@
     <div class="setting-row">
       <span class="setting-label">播放速度（字/分）</span>
       <div class="speed-btns" id="speedBtns">
-        <button class="speed-btn" data-s="120" onclick="setSpeed(120,this)">120</button>
+        <button class="speed-btn" data-s="100" onclick="setSpeed(100,this)">100</button>
+        <button class="speed-btn" data-s="140" onclick="setSpeed(140,this)">140</button>
         <button class="speed-btn" data-s="180" onclick="setSpeed(180,this)">180</button>
-        <button class="speed-btn active" data-s="240" onclick="setSpeed(240,this)">240</button>
+        <button class="speed-btn" data-s="220" onclick="setSpeed(220,this)">220</button>
+        <button class="speed-btn active" data-s="260" onclick="setSpeed(260,this)">260</button>
         <button class="speed-btn" data-s="300" onclick="setSpeed(300,this)">300</button>
-        <button class="speed-btn" data-s="360" onclick="setSpeed(360,this)">360</button>
+        <button class="speed-btn" data-s="340" onclick="setSpeed(340,this)">340</button>
+        <button class="speed-btn" data-s="380" onclick="setSpeed(380,this)">380</button>
+
       </div>
     </div>
     <div class="setting-row">
@@ -301,10 +305,10 @@ let curId = null;
 let selMode = false, selSet = new Set();
 
 let ps = {
-  running: false, speed: 240, mirror: false,
+  running: false, speed: 260, mirror: false,
   margin: 16, fontSize: 32, voiceOn: false,
   fullText: '', lines: [], curLine: 0,
-  raf: null, lastT: 0, cpm: 240/60000, charAccum: 0,
+  raf: null, lastT: 0, cpm: 260/60000, charAccum: 0,
   userScroll: false, scrollTO: null
 };
 
