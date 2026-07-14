@@ -240,6 +240,7 @@
     <button class="tool-btn btn-save" onclick="saveCurrent()">💾 保存</button>
   </div>
   <button class="btn-start" onclick="startPresent()">🎤 开始提词</button>
+  <button class="btn-start" style="background:#D32F2F;margin-bottom:8px;" onclick="startVoiceOnly()">🎙 语音跟读播放</button>
 </div>
 
 <!-- PRESENTER -->
@@ -306,7 +307,7 @@ let curId = null;
 let selMode = false, selSet = new Set();
 
 let ps = {
-  running: false, speed: 260, mirror: false,
+  running: false, voiceMode: false, speed: 260, mirror: false,
   margin: 16, fontSize: 32, voiceOn: false,
   fullText: '', lines: [], curLine: 0,
   raf: null, lastT: 0, cpm: 260/60000, charAccum: 0,
@@ -440,12 +441,30 @@ async function pasteClip(){
 function goHome(){ saveCurrent(); showPage('homePage'); renderHome(); }
 
 // ── PRESENTER ──
+function startVoiceOnly(){
+  let content=document.getElementById('scriptContent').value;
+  if(!content.trim()){toast('请先输入内容');return;}
+  saveCurrent();
+  ps.fullText = content;
+  ps.curLine=0; ps.voiceMode=true;
+  ps.running=false; ps.userScroll=false;
+  showPage('presenterPage');
+  renderLines();
+  applyMargins();
+  updatePlayBtn(); updateProgress();
+  // Auto-start voice and hide play button
+  document.getElementById('playBtn').style.display='none';
+  ps.voiceOn=true;
+  document.getElementById('voiceSw').classList.add('on');
+  startVoice();
+}
+
 function startPresent(){
   let content=document.getElementById('scriptContent').value;
   if(!content.trim()){toast('请先输入内容');return;}
   saveCurrent();
   ps.fullText = content;
-  ps.curLine=0; ps.cpm=ps.speed/60000;
+  ps.curLine=0; ps.voiceMode=false; ps.cpm=ps.speed/60000;
   ps.running=false; ps.userScroll=false;
   showPage('presenterPage');
   renderLines();
@@ -468,6 +487,7 @@ function jumpLine(i,e){
 }
 
 function togglePlay(){
+  if(ps.voiceMode) return; // No manual play in voice mode
   ps.running=!ps.running;
   updatePlayBtn();
   if(ps.running){
@@ -535,7 +555,9 @@ function stopPresent(){
   ps.running=false;
   if(ps.raf)cancelAnimationFrame(ps.raf);
   if(ps.voiceOn)stopVoice();
+  ps.voiceMode=false;
   document.getElementById('presEdit').style.display='none';
+  document.getElementById('playBtn').style.display='';
   showPage('editorPage');
 }
 
@@ -669,8 +691,10 @@ function startVoice(){
       // Update accumulated to last matched portion to prevent drift
       transcriptAccum = transcriptAccum.slice(-10);
     }
-    // Auto-start playback
-    if(!ps.running){
+    // In voice-only mode, don't start timed playback
+    if(ps.voiceMode){
+      // Voice mode: no auto-play, just follow voice
+    } else if(!ps.running){
       ps.running=true; ps.lastT=performance.now(); ps.charAccum=0;
       updatePlayBtn();
       ps.raf=requestAnimationFrame(scrollLoop);
