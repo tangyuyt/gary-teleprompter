@@ -459,6 +459,11 @@ function startVoiceOnly(){
   renderLines();
   applyMargins();
   updatePlayBtn(); updateProgress();
+  // Scroll to first line
+  setTimeout(() => {
+    let el = document.querySelector('#presText .line[data-l="0"]');
+    if(el) el.scrollIntoView({behavior:'instant', block:'center'});
+  }, 150);
   // Auto-start voice and hide play button
   document.getElementById('playBtn').style.display='none';
   ps.voiceOn=true;
@@ -542,7 +547,8 @@ function scrollToActive(){
   srAF=requestAnimationFrame(()=>{
     srAF=null;
     if(ps.userScroll)return;
-    let el=document.querySelector('#presText .line.hi');
+    // Find current line by data-l attribute (works with or without .hi)
+    let el=document.querySelector('#presText .line[data-l="'+ps.curLine+'"]');
     if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   });
 }
