@@ -639,30 +639,55 @@ function startVoice(){
   }
   rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
   rec.lang='zh-CN'; rec.continuous=true; rec.interimResults=true;
+  let transcriptAccum = ''; // Accumulate all recognized text
   rec.onresult=e=>{
-    let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
-    // Check if last 3 chars of ANY upcoming line match the end of spoken text
-    let tail = t.slice(-3);
-    for(let li=ps.curLine; li<Math.min(ps.curLine+5, ps.lines.length); li++){
-      let line = (ps.lines[li]||'').slice(-3);
-      if(line && t.indexOf(line)>=0){
-        if(li > ps.curLine){
-          ps.curLine = li;
-          renderLines(); updateProgress(); scrollToActive();
-        }
-        break;
-      }
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      transcriptAccum += e.results[i][0].transcript;
     }
-    // Auto-start playback if not already running
+    // Match accumulated transcript against full text
+    let fullText = ps.lines.join('');
+    // Try progressively shorter tails of the transcript for robust matching
+    let bestIdx = -1;
+    for(let tail=Math.min(transcriptAccum.length, 20); tail>=4; tail--){
+      let snippet = transcriptAccum.slice(-tail);
+      let idx = fullText.indexOf(snippet);
+      if(idx>=0){ bestIdx = idx + snippet.length; break; }
+    }
+    if(bestIdx>=0){
+      // Find which line contains this position
+      let charCount=0;
+      for(let i=0;i<ps.lines.length;i++){
+        charCount += (ps.lines[i]||'').length;
+        if(charCount >= bestIdx){
+          if(i > ps.curLine){
+            ps.curLine = i;
+            renderLines(); updateProgress(); scrollToActive();
+          }
+          break;
+        }
+      }
+      // Update accumulated to last matched portion to prevent drift
+      transcriptAccum = transcriptAccum.slice(-10);
+    }
+    // Auto-start playback
     if(!ps.running){
       ps.running=true; ps.lastT=performance.now(); ps.charAccum=0;
       updatePlayBtn();
-      if(!ps.raf || ps.raf._done) ps.raf=requestAnimationFrame(scrollLoop);
+      ps.raf=requestAnimationFrame(scrollLoop);
+    }
+  };
+  rec.onerror=()=>{ transcriptAccum = ''; };
+  rec.onend=()=>{
+    if(ps.voiceOn){
+      transcriptAccum = '';
+      try{rec.start();}catch(e){}
     }
   };
   rec.start();
 }
-function stopVoice(){if(rec){rec.stop();rec=null;}}
+function stopVoice(){
+  if(rec){rec.onend=null;rec.stop();rec=null;}
+}
 
 // ── HELPERS ──
 function showPage(id){
